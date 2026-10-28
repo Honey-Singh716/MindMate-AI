@@ -3,8 +3,9 @@
 body { margin: 0; min-width: 320px; }
 button, input, textarea { font: inherit; }
 button { cursor: pointer; }
-.app { display: flex; min-height: 100vh; }
-.sidebar { width: 280px; display: flex; flex-direction: column; padding: 28px 18px; background: #121218; border-right: 1px solid #292936; }
+/* Full-viewport app shell that never scrolls itself. */
+.app { display: flex; height: 100vh; height: 100dvh; overflow: hidden; }
+.sidebar { width: 280px; flex-shrink: 0; display: flex; flex-direction: column; min-height: 0; overflow: hidden; padding: 28px 18px; background: #121218; border-right: 1px solid #292936; }
 .brand { display: flex; align-items: center; gap: 10px; font-size: 20px; margin-bottom: 30px; }
 .brand-mark { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 10px; background: #7254dc; }
 .primary { border: 0; border-radius: 8px; padding: 12px 16px; color: white; background: #7254dc; font-weight: 700; }
@@ -14,7 +15,7 @@ button { cursor: pointer; }
 .main-nav { display: grid; gap: 5px; margin-top: 24px; padding-bottom: 20px; border-bottom: 1px solid #292936; }
 .nav-item { padding: 10px; border: 0; border-radius: 7px; color: #92919e; background: transparent; text-align: left; }
 .nav-item.active, .nav-item:hover { color: white; background: #1b1b25; }
-.conversation-list { flex: 1; overflow: auto; }
+.conversation-list { flex: 1; min-height: 0; overflow: auto; }
 .conversation { position: relative; display: flex; align-items: center; width: 100%; min-height: 42px; border-radius: 7px; color: #92919e; background: transparent; }
 .conversation.active, .conversation:hover { color: white; background: #1b1b25; }
 .conversation-title { display: flex; align-items: center; gap: 7px; flex: 1; min-width: 0; padding: 11px; border: 0; color: inherit; background: transparent; text-align: left; overflow: hidden; }
@@ -29,19 +30,24 @@ button { cursor: pointer; }
 .menu-popover button:hover { background: #1b1b25; color: white; }
 .menu-popover .danger-action { color: #ff8f9b; }
 .logout { padding: 10px; border: 1px solid #53303b; border-radius: 7px; color: #ff8f9b; background: transparent; }
-.workspace { flex: 1; min-width: 0; }
-.topbar { display: flex; justify-content: flex-end; align-items: center; gap: 16px; height: 68px; padding: 0 34px; border-bottom: 1px solid #292936; }
+/* Main content is a column: fixed header on top, flexible chat area below. */
+.workspace { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.topbar { display: flex; justify-content: flex-end; align-items: center; gap: 16px; flex-shrink: 0; height: 68px; padding: 0 34px; border-bottom: 1px solid #292936; }
 .profile { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: #7254dc; font-weight: 700; }
-.chat { max-width: 820px; min-height: calc(100vh - 68px); margin: auto; padding: 64px 32px; }
-.empty { max-width: 620px; margin: 15vh auto; }
+/* Chat column fills the space under the header. Only its messages child scrolls. */
+.chat { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; max-width: 820px; margin: 0 auto; padding: 64px 32px 24px; }
+.empty { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; max-width: 620px; margin: 0 auto; padding: 24px; }
 h1 { font-size: clamp(36px, 6vw, 64px); line-height: 1.05; }
 .eyebrow { color: #9b7bff; font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 .muted { color: #92919e; line-height: 1.6; }
-.messages { min-height: 55vh; }
+/* The only vertically scrollable region in the chat view. */
+.messages { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; }
 .message { display: flex; gap: 16px; margin: 24px 0; line-height: 1.7; white-space: pre-wrap; }
 .message b { min-width: 40px; color: #9b7bff; }
-.composer { display: flex; gap: 10px; padding: 12px; background: #15151d; border: 1px solid #292936; border-radius: 10px; }
-.composer textarea { flex: 1; border: 0; outline: 0; resize: vertical; color: white; background: transparent; }
+.message span { min-width: 0; overflow-wrap: break-word; }
+/* Composer stays pinned at the bottom of the chat column. */
+.composer { display: flex; flex-shrink: 0; gap: 10px; padding: 12px; background: #15151d; border: 1px solid #292936; border-radius: 10px; }
+.composer textarea { flex: 1; min-width: 0; max-height: 35vh; border: 0; outline: 0; resize: vertical; color: white; background: transparent; }
 .auth-page { display: grid; place-items: center; min-height: 100vh; padding: 24px; }
 .auth-card { width: min(100%, 420px); padding: 32px; border: 1px solid #292936; border-radius: 20px; background: #15151d; }
 .auth-card form { display: grid; gap: 16px; margin-top: 24px; }
@@ -49,8 +55,9 @@ h1 { font-size: clamp(36px, 6vw, 64px); line-height: 1.05; }
 .auth-card input { padding: 12px; border: 1px solid #292936; border-radius: 7px; color: white; background: #0e0e13; }
 .auth-card .primary { width: 100%; }
 .link-button { margin-top: 18px; border: 0; color: #9b7bff; background: transparent; }
-.error { color: #ff8f9b; }
-.planner { max-width: 760px; }
+.error { flex-shrink: 0; color: #ff8f9b; }
+/* Planner scrolls inside the chat column when it overflows. */
+.planner { flex: 1; min-height: 0; overflow-y: auto; max-width: 760px; }
 .planner h1 { margin-bottom: 8px; }
 .planner-form { display: grid; gap: 16px; max-width: 680px; margin-top: 30px; padding: 24px; border: 1px solid #292936; border-radius: 12px; background: #15151d; }
 .planner-form label { display: grid; gap: 8px; color: #c4c2cd; font-size: 13px; font-weight: 600; }
@@ -65,7 +72,7 @@ h1 { font-size: clamp(36px, 6vw, 64px); line-height: 1.05; }
 .priority { height: max-content; padding: 5px 9px; border-radius: 12px; color: #d2c4ff; background: #28213d; font-size: 11px; }
 .priority.medium { color: #e8bc73; background: #332d20; }
 .priority.low { color: #92919e; background: #292936; }
-@media (max-width: 700px) { .sidebar { width: 220px; } .chat { padding: 38px 18px; } .topbar { padding: 0 18px; } .composer { flex-direction: column; } .form-row { grid-template-columns: 1fr; } .plan-topic { grid-template-columns: 1fr; } }
+@media (max-width: 700px) { .sidebar { width: 220px; } .chat { padding: 24px 16px; } .topbar { padding: 0 18px; } .composer { flex-direction: column; } .form-row { grid-template-columns: 1fr; } .plan-topic { grid-template-columns: 1fr; } }
 
 /* Model selector */
 .topbar { justify-content: space-between; }
@@ -84,3 +91,24 @@ h1 { font-size: clamp(36px, 6vw, 64px); line-height: 1.05; }
   .model-select { max-width: 160px; }
   .model-unavailable-notice { flex-basis: 100%; }
 }
+
+/* Documents view (RAG) */
+.documents { flex: 1; min-height: 0; overflow-y: auto; max-width: 760px; }
+.documents h1 { margin-bottom: 8px; }
+.upload-form { display: flex; gap: 10px; align-items: center; margin-top: 24px; padding: 16px; border: 1px solid #292936; border-radius: 10px; background: #15151d; }
+.upload-form input[type="file"] { flex: 1; color: #c4c2cd; font-size: 13px; }
+.upload-form .primary { white-space: nowrap; }
+.document-list { display: grid; gap: 10px; margin-top: 20px; }
+.document-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border: 1px solid #292936; border-radius: 10px; background: #15151d; }
+.document-item strong { font-size: 14px; }
+.document-item .muted { margin: 2px 0 0; font-size: 12px; }
+.document-item .danger-action { border: 1px solid #53303b; border-radius: 7px; padding: 8px 12px; color: #ff8f9b; background: transparent; }
+/* RAG toggle + sources */
+.rag-toggle { display: inline-flex; align-items: center; gap: 6px; color: #c4c2cd; font-size: 13px; white-space: nowrap; }
+.rag-toggle input { accent-color: #7254dc; }
+.sources { margin: 14px 0; padding: 14px 16px; border: 1px solid #292936; border-radius: 10px; background: #15151d; }
+.sources .eyebrow { margin-bottom: 8px; }
+.source { padding: 8px 0; border-top: 1px solid #292936; }
+.source:first-of-type { border-top: 0; }
+.source .muted { margin: 4px 0 0; font-size: 12px; }
+@media (max-width: 700px) { .upload-form { flex-direction: column; align-items: stretch; } }

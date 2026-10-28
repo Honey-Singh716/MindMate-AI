@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import './App.css'
 
 const tokenKey = 'mindmate_token'
@@ -78,6 +78,18 @@ function App() {
   const [modelsError, setModelsError] = useState('')
   const [modelsStale, setModelsStale] = useState(false)
   const [modelUnavailable, setModelUnavailable] = useState(false)
+  // RAG state
+  const [documents, setDocuments] = useState([])
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState('')
+  const [ragMode, setRagMode] = useState(false)
+  const [lastSources, setLastSources] = useState([])
+
+  // Refs for the scrollable conversation area and its auto-scroll behavior.
+  const messagesRef = useRef(null)
+  const stickToBottom = useRef(true)
+  const lastConversationId = useRef(null)
+  const fileInput = useRef(null)
 
   async function loadModels({ refresh = false } = {}) {
     setModelsLoading(true)
@@ -93,7 +105,6 @@ function App() {
         setSelectedModel(current)
         setModelUnavailable(false)
       } else if (current && !stillThere) {
-        // Previously selected model is gone: ask the user to pick another.
         setSelectedModel('')
         setModelUnavailable(true)
       } else if (!current && list.length) {
@@ -114,8 +125,6 @@ function App() {
     else localStorage.removeItem('mindmate_model')
   }
 
-  // Surfaces a backend "model_unavailable" payload by refreshing the dropdown and
-  // prompting the user to choose again; otherwise shows the message inline.
   function handleApiError(requestError) {
     const payload = requestError.payload || {}
     if (payload.code === 'model_unavailable' && Array.isArray(payload.availableModels)) {
@@ -124,6 +133,17 @@ function App() {
       setModelUnavailable(true)
     }
     setError(requestError.message)
+  }
+
+  function scrollToBottom() {
+    const el = messagesRef.current
+    if (el) el.scrollTop = el.scrollHeight
+  }
+
+  function handleMessagesScroll() {
+    const el = messagesRef.current
+    if (!el) return
+    stickToBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80
   }
 
   async function loadConversations() {
@@ -135,6 +155,7 @@ function App() {
   async function selectConversation(id) {
     const data = await api(`/api/conversations/${encodeURIComponent(id)}`)
     setActive(data.conversation)
+    setLastSources([])
   }
 
   async function createConversation() {
@@ -177,13 +198,20 @@ function App() {
     event.preventDefault()
     if (!message.trim() || !active || busy) return
     setBusy(true)
+    stickToBottom.current = true
     setError('')
+    setLastSources([])
     try {
       const data = await api(`/api/conversations/${active.id}/chat`, {
         method: 'POST',
-        body: JSON.stringify({ message: message.trim(), ...(selectedModel ? { model: selectedModel } : {}) }),
+        body: JSON.stringify({
+          message: message.trim(),
+          ...(selectedModel ? { model: selectedModel } : {}),
+          ...(ragMode ? { rag: true } : {}),
+        }),
       })
       setActive(data.conversation)
+      setLastSources(Array.isArray(data.sources) ? data.sources : [])
       setMessage('')
       await loadConversations()
     } catch (requestError) {
@@ -191,7 +219,6 @@ function App() {
     } finally {
       setBusy(false)
     }
-
   }
 
   async function generatePlan(event) {
@@ -213,6 +240,47 @@ function App() {
     }
   }
 
+  // --- Documents (RAG) ---
+  async function loadDocuments() {
+    try {
+      const data = await api('/api/documents')
+      setDocuments(data.documents || [])
+    } catch { /* keep last list on error */ }
+  }
+
+  async function uploadPdf(file) {
+    if (!file) return
+    setUploading(true)
+    setUploadError('')
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      const res = await fetch('/api/documents', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${localStorage.getItem(tokenKey)}` },
+        body: fd,
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.error || 'Upload failed.')
+      await loadDocuments()
+    } catch (e) {
+      setUploadError(e.message)
+    } finally {
+      setUploading(false)
+      if (fileInput.current) fileInput.current.value = ''
+    }
+  }
+
+  async function removeDocument(doc) {
+    if (!window.confirm(`Delete "${doc.filename}"? This removes its chunks and embeddings.`)) return
+    try {
+      await api(`/api/documents/${encodeURIComponent(doc.id)}`, { method: 'DELETE' })
+      await loadDocuments()
+    } catch (e) {
+      setError(e.message)
+    }
+  }
+
   function logout() {
     localStorage.removeItem(tokenKey)
     setUser(null)
@@ -231,9 +299,24 @@ function App() {
     if (user) {
       loadConversations().catch((requestError) => setError(requestError.message))
       loadModels().catch(() => {})
+      loadDocuments()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
+
+  useLayoutEffect(() => {
+    const id = active?.id ?? null
+    if (lastConversationId.current !== id) {
+      lastConversationId.current = id
+      stickToBottom.current = true
+      scrollToBottom()
+    }
+  }, [active?.id])
+
+  useLayoutEffect(() => {
+    if (stickToBottom.current) scrollToBottom()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active?.history?.length, busy, view])
 
   if (!user) return <AuthForm onAuthenticated={setUser} />
 
@@ -245,6 +328,7 @@ function App() {
         <nav className="main-nav">
           <button className={view === 'chat' ? 'nav-item active' : 'nav-item'} onClick={() => setView('chat')}>◈ AI Chat</button>
           <button className={view === 'planner' ? 'nav-item active' : 'nav-item'} onClick={() => setView('planner')}>▦ Study Planner</button>
+          <button className={view === 'documents' ? 'nav-item active' : 'nav-item'} onClick={() => setView('documents')}>▤ Documents</button>
         </nav>
         <p className="section-label">Recent conversations</p>
         <div className="conversation-list">
@@ -304,16 +388,57 @@ function App() {
               {plan && <PlanCard plan={plan} />}
               {error && <p className="error">{error}</p>}
             </section>
+          ) : view === 'documents' ? (
+            <section className="documents">
+              <p className="eyebrow">Knowledge base</p>
+              <h1>Documents</h1>
+              <p className="muted">Upload study PDFs, then toggle “Ask my docs” in chat to answer from them.</p>
+              <form className="upload-form" onSubmit={(event) => { event.preventDefault(); uploadPdf(fileInput.current?.files?.[0]) }}>
+                <input type="file" accept="application/pdf" ref={fileInput} aria-label="Choose a PDF" />
+                <button className="primary" disabled={uploading}>{uploading ? 'Uploading & indexing…' : 'Upload PDF'}</button>
+              </form>
+              {uploadError && <p className="error">{uploadError}</p>}
+              <div className="document-list">
+                {documents.map((doc) => (
+                  <div className="document-item" key={doc.id}>
+                    <div>
+                      <strong>{doc.filename}</strong>
+                      <p className="muted">{doc.total_pages ?? '?'} pages · {doc.chunk_count} chunks · {Math.max(1, Math.round((doc.size_bytes || 0) / 1024))} KB</p>
+                    </div>
+                    <button className="danger-action" onClick={() => removeDocument(doc)}>Delete</button>
+                  </div>
+                ))}
+                {documents.length === 0 && <p className="muted">No documents uploaded yet.</p>}
+              </div>
+              {error && <p className="error">{error}</p>}
+            </section>
           ) : (
           !active ? (
             <div className="empty"><p className="eyebrow">Your focused learning companion</p><h1>What are you curious about?</h1><p className="muted">Create a conversation to start learning with Groq-powered MindMate.</p><button className="primary" onClick={createConversation}>Start learning</button></div>
           ) : (
             <>
-              <div className="messages">
+              <div className="messages" ref={messagesRef} onScroll={handleMessagesScroll}>
                 {active.history.map((item, index) => <article className={`message ${item.role}`} key={`${item.role}-${index}`}><b>{item.role === 'model' ? '✦' : 'You'}</b><span>{item.parts?.map((part) => part.text).join(' ')}</span></article>)}
                 {busy && <p className="muted">MindMate is thinking...</p>}
+                {lastSources.length > 0 && (
+                  <div className="sources">
+                    <p className="eyebrow">Sources</p>
+                    {lastSources.map((source, index) => (
+                      <div className="source" key={`${source.documentId}-${index}`}>
+                        <strong>{source.filename}</strong>{source.page ? <span className="muted"> · page {source.page}</span> : null}
+                        <p className="muted">{source.snippet}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-              <form className="composer" onSubmit={sendMessage}><textarea value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Ask MindMate anything..." rows="3" /><button className="primary" disabled={busy}>Send</button></form>
+              <form className="composer" onSubmit={sendMessage}>
+                <label className="rag-toggle" title="Answer from your uploaded documents">
+                  <input type="checkbox" checked={ragMode} onChange={(event) => setRagMode(event.target.checked)} /> Ask my docs
+                </label>
+                <textarea value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Ask MindMate anything..." rows="3" />
+                <button className="primary" disabled={busy}>Send</button>
+              </form>
               {error && <p className="error">{error}</p>}
             </>
           )
