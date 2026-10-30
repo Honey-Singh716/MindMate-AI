@@ -106,15 +106,11 @@ async function embedText(text) {
 }
 
 
-// Pre-warm the neural embedding pipeline in the background on startup
-// so users don't have to wait for model download on their first upload!
-if (getProvider() === "local" && process.env.NODE_ENV !== "test") {
-    setTimeout(() => {
-        getPipeline().catch((err) => {
-            console.warn("Background embedding warm-up notice:", err.message);
-        });
-    }, 1500);
-}
+// NOTE: Pre-warming the embedding pipeline on startup is intentionally disabled.
+// On Render free tier (512 MB RAM), loading the 25 MB ONNX model at boot
+// consumes all available memory before any request arrives, which causes a
+// SIGKILL that terminates the process and drops every in-flight HTTP connection.
+// The model is loaded on-demand on the first upload request instead.
 
 module.exports = {
     EMBEDDING_DIM,
