@@ -1,0 +1,39 @@
+# render.yaml — Render deployment configuration for MindMate AI backend.
+# Reference: https://render.com/docs/infrastructure-as-code
+#
+# Health-check path: GET /api/health
+# This endpoint returns HTTP 200 with no auth, no DB queries, no secrets.
+# Render uses it to confirm the dyno is up after each deploy.
+# UptimeRobot (or any external monitor) should ping the same path every
+# 14 minutes to prevent the free-tier dyno from sleeping.
+
+services:
+  - type: web
+    name: mindmate-ai
+    runtime: node
+    plan: free                        # change to "starter" or higher to eliminate cold starts
+    region: oregon                    # match your database region to minimize latency
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        generateValue: false          # Render injects PORT automatically — leave unset here
+      - key: GROQ_API_KEY
+        sync: false                   # set manually in Render dashboard → Environment
+      - key: JWT_SECRET
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: GROQ_MODEL
+        sync: false
+      - key: MODELS_CACHE_TTL_MS
+        value: "900000"
+      - key: EMBEDDING_PROVIDER
+        value: local
+      - key: EMBEDDING_DIM
+        value: "384"
+      - key: CORS_ORIGIN
+        sync: false                   # set to your Vercel URL if needed, e.g. https://mind-mate-ai-theta.vercel.app

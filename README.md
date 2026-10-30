@@ -98,6 +98,7 @@ Open `http://localhost:5173`, sign up, and start chatting.
 ## API (RAG endpoints)
 | Method | Path | Auth | Description |
 |---|---|---|---|
+| `GET` | `/api/health` | **none** | Health check — returns `{status:"ok", uptime, timestamp}`. Used by Render and UptimeRobot. |
 | `POST` | `/api/documents` | yes (multipart `file`) | Upload + extract + chunk + embed + store; returns metadata + preview. |
 | `GET` | `/api/documents` | yes | List the caller's documents. |
 | `GET` | `/api/documents/:id` | yes | Get one document's metadata. |
@@ -141,3 +142,113 @@ $env:RUN_LOCAL_EMBEDDING="1"; npm test
 ```
 
 This is a learning/resume project. Do not put real credentials in `.env` or commit it.
+
+---
+
+## Deployment
+
+### Backend — Render
+
+The backend is deployed on [Render](https://render.com). A `render.yaml` is included at the repo root; Render reads it automatically when you connect the repository.
+
+**First deploy steps:**
+1. Push this repository to GitHub (already done).
+2. In [Render Dashboard](https://dashboard.render.com) → **New → Web Service** → connect the GitHub repo.
+3. Render detects `render.yaml` and pre-fills build/start commands.
+4. In **Environment** tab, add the secret variables (they are marked `sync: false` in `render.yaml` so they are never committed):
+   - `GROQ_API_KEY`
+   - `JWT_SECRET`
+   - `DATABASE_URL`
+   - `CORS_ORIGIN` → set to your Vercel frontend URL, e.g. `https://mind-mate-ai-theta.vercel.app`
+5. Click **Deploy**.
+
+Render uses `GET /api/health` (declared in `render.yaml` as `healthCheckPath`) to verify a successful deploy.
+
+### Frontend — Vercel
+
+1. In [Vercel Dashboard](https://vercel.com) → **Import Project** → connect the GitHub repo, set **Root Directory** to `frontend`.
+2. Add environment variable: `VITE_API_URL` → your Render backend URL, e.g. `https://mindmate-ai-cbdb.onrender.com`
+3. Deploy.
+
+---
+
+## Health Check & Uptime Monitoring
+
+### Health endpoint
+
+```
+GET /api/health
+```
+
+- **No authentication required.**
+- **No database queries** — reads only `process.uptime()` and `new Date()`.
+- Response (HTTP 200):
+  ```json
+  { "status": "ok", "uptime": 4217, "timestamp": "2026-10-27T14:05:00.000Z" }
+  ```
+- Response time: < 5 ms.
+- Does **not** expose secrets, environment variables, or any internal state.
+
+### Why this is needed
+
+Render's **free tier** spins down a web service after **15 minutes of inactivity**. The next request after a cold start takes 30–60 seconds to respond, which makes the app feel broken for the first user. Pinging the health endpoint every **14 minutes** keeps the dyno warm.
+
+> ⚠️ **Limitation**: Render free-tier dynos are allowed a maximum of **750 instance-hours per month**. Keeping a dyno awake 24/7 consumes all 720 of those hours. If you exceed the limit mid-month, Render suspends the service until the next billing cycle. For a portfolio project with light traffic this is acceptable; for production use, upgrade to the **Starter** plan ($7/month) which removes cold starts entirely.
+
+### Configuring UptimeRobot (free — recommended)
+
+UptimeRobot's free tier supports up to 50 monitors with a minimum interval of 5 minutes.
+
+1. Create a free account at [https://uptimerobot.com](https://uptimerobot.com).
+2. Click **Add New Monitor**.
+3. Fill in the form:
+
+   | Field | Value |
+   |---|---|
+   | Monitor Type | `HTTP(s)` |
+   | Friendly Name | `MindMate AI – Health` |
+   | URL | `https://mindmate-ai-cbdb.onrender.com/api/health` |
+   | Monitoring Interval | `14 minutes` (or `15 minutes` — both work) |
+   | Monitor Timeout | `30` seconds |
+   | HTTP Method | `GET` |
+   | Alert Contacts | your email (optional) |
+
+4. Click **Create Monitor**.
+
+UptimeRobot will now send `GET https://mindmate-ai-cbdb.onrender.com/api/health` every 14 minutes. Because Render spins down after 15 minutes of inactivity, a 14-minute ping interval keeps the dyno awake.
+
+> **Your production backend URL is `https://mindmate-ai-cbdb.onrender.com`** — confirmed by the `VITE_API_URL` comment in `frontend/src/api.js`. Update the URL above if Render assigns a different hostname.
+
+### Alternative: Cron-job.org (free, no signup friction)
+
+If you prefer not to create a UptimeRobot account:
+
+1. Go to [https://cron-job.org](https://cron-job.org) (free, no credit card).
+2. Sign up → **CREATE CRONJOB**.
+3. Set:
+   - **URL**: `https://mindmate-ai-cbdb.onrender.com/api/health`
+   - **Schedule**: every 14 minutes (use custom: `*/14 * * * *`)
+   - **Request method**: `GET`
+4. Save.
+
+### Verifying the health endpoint locally
+
+```powershell
+# Start the backend
+npm run dev
+
+# In a second terminal — should print {"status":"ok","uptime":…,"timestamp":…}
+curl http://localhost:3000/api/health
+# or
+Invoke-RestMethod http://localhost:3000/api/health
+```
+
+### Verifying the production endpoint
+
+```powershell
+# Replace with your actual Render URL
+curl https://mindmate-ai-cbdb.onrender.com/api/health
+```
+
+Expected: HTTP 200 with `{"status":"ok","uptime":…,"timestamp":"…"}`.
+If you get a timeout on first hit, the dyno was sleeping — wait 30–60 seconds and retry.

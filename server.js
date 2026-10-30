@@ -870,6 +870,18 @@ async function handleApi(request, response, store) {
     const url = new URL(request.url, `http://${request.headers.host || "localhost"}`);
     const parts = url.pathname.split("/").filter(Boolean);
 
+    if (request.method === "GET" && url.pathname === "/api/health") {
+        // Lightweight health-check endpoint — no auth, no DB, no secrets.
+        // Called every 14 min by UptimeRobot to keep the Render dyno awake.
+        // Responds in < 5 ms; safe to hit at any interval.
+        sendJson(response, 200, {
+            status: "ok",
+            uptime: Math.floor(process.uptime()),
+            timestamp: new Date().toISOString(),
+        });
+        logEvent("health_check");
+        return;
+    }
     if (request.method === "GET" && url.pathname === "/api/config") {
         if (rejectIfRateLimited(request, response, null)) return;
         sendJson(response, 200, { mockMode: MOCK_MODE });
