@@ -138,17 +138,10 @@ export default function DocumentsView({
           )}
         </div>
 
-        {uploadError && (
+        {(uploadError || error) && (
           <div className="doc-error-banner animate-fade-in" role="alert">
             <span className="error-icon">⚠</span>
-            <span>{uploadError}</span>
-          </div>
-        )}
-
-        {error && (
-          <div className="doc-error-banner animate-fade-in" role="alert">
-            <span className="error-icon">⚠</span>
-            <span>{error}</span>
+            <span>{uploadError || error}</span>
           </div>
         )}
 

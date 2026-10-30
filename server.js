@@ -48,15 +48,32 @@ if (process.env.CORS_ORIGIN) {
     }
 }
 
+function isOriginAllowed(origin) {
+    if (!origin) return false;
+    if (ALLOWED_ORIGINS.has(origin)) return true;
+    try {
+        const url = new URL(origin);
+        // Allow any Vercel deployment preview or branch URL for MindMate
+        if (url.hostname.endsWith(".vercel.app") && (url.hostname.includes("mind-mate") || url.hostname.includes("mindmate"))) {
+            return true;
+        }
+        if (url.hostname === "localhost" || url.hostname === "127.0.0.1") {
+            return true;
+        }
+    } catch {}
+    return false;
+}
+
 function applyCorsHeaders(request, response) {
     const origin = request.headers.origin || "";
-    if (ALLOWED_ORIGINS.has(origin)) {
+    if (isOriginAllowed(origin)) {
         response.setHeader("Access-Control-Allow-Origin", origin);
         response.setHeader("Vary", "Origin");
+        response.setHeader("Access-Control-Allow-Credentials", "true");
     }
     response.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS");
-    response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    response.setHeader("Access-Control-Allow-Credentials", "true");
+    const requestedHeaders = request.headers["access-control-request-headers"];
+    response.setHeader("Access-Control-Allow-Headers", requestedHeaders || "Content-Type, Authorization, Accept, X-Requested-With");
     response.setHeader("Access-Control-Max-Age", "86400");
 }
 // ---

@@ -253,27 +253,31 @@ async function addChunks(documentId, ownerId, chunks) {
     await ensureRagSchema();
     if (!chunks.length) return;
 
-    const values = [];
-    const params = [];
-    for (let i = 0; i < chunks.length; i += 1) {
-        const chunk = chunks[i];
-        const base = i * 7;
-        values.push(`($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}${useVector ? "::vector" : "::jsonb"})`);
-        params.push(
-            crypto.randomUUID(),
-            documentId,
-            ownerId,
-            chunk.page ?? null,
-            chunk.index,
-            chunk.text,
-            toEmbeddingParam(chunk.embedding)
+    const BATCH_SIZE = 50;
+    for (let start = 0; start < chunks.length; start += BATCH_SIZE) {
+        const slice = chunks.slice(start, start + BATCH_SIZE);
+        const values = [];
+        const params = [];
+        for (let i = 0; i < slice.length; i += 1) {
+            const chunk = slice[i];
+            const base = i * 7;
+            values.push(`(${base + 1}, ${base + 2}, ${base + 3}, ${base + 4}, ${base + 5}, ${base + 6}, ${base + 7}${useVector ? "::vector" : "::jsonb"})`);
+            params.push(
+                crypto.randomUUID(),
+                documentId,
+                ownerId,
+                chunk.page ?? null,
+                chunk.index,
+                chunk.text,
+                toEmbeddingParam(chunk.embedding)
+            );
+        }
+        await getPool().query(
+            `INSERT INTO chunks (id, document_id, owner_id, page, chunk_index, content, embedding)
+             VALUES ${values.join(", ")}`,
+            params
         );
     }
-    await getPool().query(
-        `INSERT INTO chunks (id, document_id, owner_id, page, chunk_index, content, embedding)
-         VALUES ${values.join(", ")}`,
-        params
-    );
     await getPool().query(
         "UPDATE documents SET chunk_count = $1 WHERE id = $2 AND owner_id = $3",
         [chunks.length, documentId, ownerId]

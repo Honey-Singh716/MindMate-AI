@@ -19,6 +19,12 @@ export default function App() {
   const [conversations, setConversations] = useState([])
   const [active, setActive] = useState(null)
   const [view, setView] = useState('chat') // 'chat' | 'planner' | 'documents'
+
+  function handleSetView(newView) {
+    setError('')
+    setUploadError('')
+    setView(newView)
+  }
   const [message, setMessage] = useState('')
   const [planInput, setPlanInput] = useState({ subject: '', hours: '', level: 'Beginner', goal: '', deadline: '' })
   const [plan, setPlan] = useState(null)
@@ -293,6 +299,7 @@ export default function App() {
     if (!file) return
     setUploading(true)
     setUploadError('')
+    setError('')
     try {
       const fd = new FormData()
       fd.append('file', file)
@@ -302,7 +309,10 @@ export default function App() {
       // Automatically enable RAG mode so user can query immediately
       setRagMode(true)
     } catch (e) {
-      setUploadError(e.message)
+      const msg = e.message === 'Failed to fetch'
+        ? 'Could not connect to backend server. The upload timed out or the connection was interrupted. Please try again.'
+        : e.message
+      setUploadError(msg)
     } finally {
       setUploading(false)
     }
@@ -380,7 +390,7 @@ export default function App() {
           onOpenAuth={(mode) => setAuthModalMode(mode)}
           onEnterWorkspace={(preferredView) => {
             if (user) {
-              if (preferredView) setView(preferredView)
+              if (preferredView) handleSetView(preferredView)
               setCurrentPage('workspace')
             } else {
               setAuthModalMode('login')
@@ -388,7 +398,7 @@ export default function App() {
           }}
           onSelectFeature={(feature) => {
             if (user) {
-              setView(feature)
+              handleSetView(feature)
               setCurrentPage('workspace')
             } else {
               setAuthModalMode('login')
@@ -399,7 +409,7 @@ export default function App() {
         <AppLayout
           user={user || { email: 'scholar@mindmate.ai' }}
           view={view}
-          setView={setView}
+          setView={handleSetView}
           conversations={conversations}
           activeConversation={active}
           onSelectConversation={selectConversation}
@@ -437,7 +447,7 @@ export default function App() {
               onUploadPdf={uploadPdf}
               onRemoveDocument={removeDocument}
               error={error}
-              onSwitchToChat={() => setView('chat')}
+              onSwitchToChat={() => handleSetView('chat')}
             />
           ) : (
             <AIChatView
