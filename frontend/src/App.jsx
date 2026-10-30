@@ -97,12 +97,15 @@ export default function App() {
     showToast(requestError.message, 4500)
   }
 
-  async function loadConversations() {
+  async function loadConversations(currentActiveId = active?.id) {
     try {
       const data = await api('/api/conversations')
-      setConversations(data.conversations || [])
-      if (!active && data.conversations?.[0]) {
-        selectConversation(data.conversations[0].id)
+      const list = data.conversations || []
+      setConversations(list)
+      if (list.length === 0) {
+        setActive(null)
+      } else if (!currentActiveId || !list.some((c) => c.id === currentActiveId)) {
+        selectConversation(list[0].id)
       }
     } catch (e) {
       console.error('Failed to load conversations:', e)
@@ -123,11 +126,22 @@ export default function App() {
     try {
       const data = await api('/api/conversations', { method: 'POST', body: JSON.stringify({}) })
       setActive(data.conversation)
-      await loadConversations()
+      setConversations((prev) => [
+        {
+          id: data.conversation.id,
+          title: data.conversation.title,
+          createdAt: data.conversation.createdAt,
+          updatedAt: data.conversation.updatedAt,
+          pinned: false,
+          messageCount: (data.conversation.history || []).length,
+        },
+        ...prev.filter((c) => c.id !== data.conversation.id),
+      ])
       showToast('Created new conversation thread')
       return data.conversation
     } catch (e) {
       setError(e.message)
+      return null
     }
   }
 
@@ -189,8 +203,32 @@ export default function App() {
       })
       setActive(data.conversation)
       setLastSources(Array.isArray(data.sources) ? data.sources : [])
-      await loadConversations()
+      await loadConversations(data.conversation.id)
     } catch (requestError) {
+      // Auto-recover if conversation was wiped, missing, or deleted
+      if (requestError.message === 'Conversation not found.' || requestError.payload?.error === 'Conversation not found.') {
+        try {
+          const fresh = await createConversation()
+          if (fresh) {
+            const retryData = await api(`/api/conversations/${fresh.id}/chat`, {
+              method: 'POST',
+              body: JSON.stringify({
+                message: messageToSend,
+                ...(selectedModel ? { model: selectedModel } : {}),
+                ...(ragMode ? { rag: true } : {}),
+              }),
+            })
+            setActive(retryData.conversation)
+            setLastSources(Array.isArray(retryData.sources) ? retryData.sources : [])
+            await loadConversations(retryData.conversation.id)
+            return
+          }
+        } catch (retryError) {
+          setMessage(messageToSend)
+          handleApiError(retryError)
+          return
+        }
+      }
       // Restore user text on error
       setMessage(messageToSend)
       handleApiError(requestError)
@@ -218,6 +256,23 @@ export default function App() {
       setPlan(data.plan)
       showToast('Study curriculum synthesized successfully')
     } catch (requestError) {
+      if (requestError.message === 'Conversation not found.' || requestError.payload?.error === 'Conversation not found.') {
+        try {
+          const fresh = await createConversation()
+          if (fresh) {
+            const retryData = await api(`/api/conversations/${fresh.id}/study-plan`, {
+              method: 'POST',
+              body: JSON.stringify({ ...planInput, ...(selectedModel ? { model: selectedModel } : {}) }),
+            })
+            setPlan(retryData.plan)
+            showToast('Study curriculum synthesized successfully')
+            return
+          }
+        } catch (retryError) {
+          handleApiError(retryError)
+          return
+        }
+      }
       handleApiError(requestError)
     } finally {
       setBusy(false)

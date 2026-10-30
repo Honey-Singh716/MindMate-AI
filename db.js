@@ -4,6 +4,7 @@ const crypto = require("node:crypto");
 let pool;
 let schemaReady;
 let ragSchemaReady;
+let conversationSchemaReady;
 // Set to true once the pgvector extension is confirmed available; false means
 // we store embeddings as JSONB and rank with cosine similarity in Node.
 let useVector = null;
@@ -96,6 +97,115 @@ async function ensureRagSchema() {
         });
     }
     await ragSchemaReady;
+}
+
+// ----------------------------- CONVERSATIONS --------------------------------
+// Store conversations in PostgreSQL so they survive Render restarts / redeploys.
+async function ensureConversationSchema() {
+    if (!conversationSchemaReady) {
+        conversationSchemaReady = (async () => {
+            await ensureSchema();
+            await getPool().query(`
+                CREATE TABLE IF NOT EXISTS conversations (
+                    id          UUID        PRIMARY KEY,
+                    owner_id    UUID        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    title       TEXT        NOT NULL DEFAULT 'New conversation',
+                    pinned      BOOLEAN     NOT NULL DEFAULT FALSE,
+                    summary     TEXT        NOT NULL DEFAULT '',
+                    history     JSONB       NOT NULL DEFAULT '[]',
+                    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )
+            `);
+            await getPool().query(
+                "CREATE INDEX IF NOT EXISTS conversations_owner_idx ON conversations(owner_id)"
+            );
+        })().catch((error) => {
+            conversationSchemaReady = null;
+            throw error;
+        });
+    }
+    await conversationSchemaReady;
+}
+
+function normalizeDbConversation(row) {
+    if (!row) return null;
+    return {
+        id: row.id,
+        ownerId: row.owner_id,
+        title: row.title,
+        pinned: row.pinned,
+        summary: row.summary || "",
+        history: Array.isArray(row.history)
+            ? row.history
+            : (typeof row.history === "string" ? JSON.parse(row.history) : []),
+        createdAt: row.created_at ? new Date(row.created_at).toISOString() : new Date().toISOString(),
+        updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : new Date().toISOString(),
+    };
+}
+
+async function createConversationRecord({ id, ownerId, title = "New conversation" }) {
+    await ensureConversationSchema();
+    const result = await getPool().query(
+        `INSERT INTO conversations (id, owner_id, title)
+         VALUES ($1, $2, $3)
+         RETURNING id, owner_id, title, pinned, summary, history, created_at, updated_at`,
+        [id, ownerId, title]
+    );
+    return normalizeDbConversation(result.rows[0]);
+}
+
+async function getConversationRecord(ownerId, id) {
+    await ensureConversationSchema();
+    const result = await getPool().query(
+        `SELECT id, owner_id, title, pinned, summary, history, created_at, updated_at
+         FROM conversations WHERE id = $1 AND owner_id = $2`,
+        [id, ownerId]
+    );
+    return normalizeDbConversation(result.rows[0]);
+}
+
+async function listConversationRecords(ownerId) {
+    await ensureConversationSchema();
+    const result = await getPool().query(
+        `SELECT id, owner_id, title, pinned, summary, history, created_at, updated_at
+         FROM conversations WHERE owner_id = $1
+         ORDER BY pinned DESC, updated_at DESC`,
+        [ownerId]
+    );
+    return result.rows.map(normalizeDbConversation);
+}
+
+async function updateConversationRecord(ownerId, id, fields) {
+    await ensureConversationSchema();
+    const allowed = ["title", "pinned", "summary", "history"];
+    const sets = [];
+    const params = [];
+    for (const key of allowed) {
+        if (Object.prototype.hasOwnProperty.call(fields, key)) {
+            params.push(key === "history" ? JSON.stringify(fields[key]) : fields[key]);
+            sets.push(`${key} = $${params.length}`);
+        }
+    }
+    if (sets.length === 0) return null;
+    sets.push("updated_at = NOW()");
+    params.push(id, ownerId);
+    const result = await getPool().query(
+        `UPDATE conversations SET ${sets.join(", ")}
+         WHERE id = $${params.length - 1} AND owner_id = $${params.length}
+         RETURNING id, owner_id, title, pinned, summary, history, created_at, updated_at`,
+        params
+    );
+    return normalizeDbConversation(result.rows[0]);
+}
+
+async function deleteConversationRecord(ownerId, id) {
+    await ensureConversationSchema();
+    const result = await getPool().query(
+        "DELETE FROM conversations WHERE id = $1 AND owner_id = $2",
+        [id, ownerId]
+    );
+    return (result.rowCount || 0) > 0;
 }
 
 // Format a JS number[] for the configured column type. For pgvector we pass the
@@ -298,5 +408,10 @@ module.exports = {
     getDocument,
     deleteDocument,
     retrieveChunks,
+    createConversationRecord,
+    getConversationRecord,
+    listConversationRecords,
+    updateConversationRecord,
+    deleteConversationRecord,
     close,
 };
