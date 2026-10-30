@@ -870,18 +870,23 @@ async function handleApi(request, response, store) {
     const url = new URL(request.url, `http://${request.headers.host || "localhost"}`);
     const parts = url.pathname.split("/").filter(Boolean);
 
+    // ── PUBLIC ROUTES (no authentication, no rate-limit) ──────────────────
+    // IMPORTANT: every route in this block MUST return before the global
+    // authenticateRequest() guard that follows. Adding auth to this block
+    // breaks UptimeRobot and Render's own health-check probes.
     if (request.method === "GET" && url.pathname === "/api/health") {
-        // Lightweight health-check endpoint — no auth, no DB, no secrets.
-        // Called every 14 min by UptimeRobot to keep the Render dyno awake.
-        // Responds in < 5 ms; safe to hit at any interval.
+        // No auth. No DB. No secrets. Safe to call at any frequency.
+        // UptimeRobot pings this every 14 min to prevent Render free-tier sleep.
+        // Render itself uses healthCheckPath: /api/health in render.yaml.
         sendJson(response, 200, {
             status: "ok",
             uptime: Math.floor(process.uptime()),
             timestamp: new Date().toISOString(),
         });
         logEvent("health_check");
-        return;
+        return; // ← MUST stay here — do not move below the auth guard
     }
+    // ── END PUBLIC ROUTES ─────────────────────────────────────────────────
     if (request.method === "GET" && url.pathname === "/api/config") {
         if (rejectIfRateLimited(request, response, null)) return;
         sendJson(response, 200, { mockMode: MOCK_MODE });
