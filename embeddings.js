@@ -61,7 +61,7 @@ async function localEmbedBatch(texts) {
     const extractor = await getPipeline();
     const results = [];
     // Process in small batches of 4 chunks to avoid memory spikes / OOM on 512MB hosts
-    const BATCH_SIZE = 4;
+    const BATCH_SIZE = 8;
     for (let i = 0; i < texts.length; i += BATCH_SIZE) {
         const batch = texts.slice(i, i + BATCH_SIZE);
         const output = await extractor(batch, { pooling: "mean", normalize: true });
@@ -103,6 +103,17 @@ async function embedTexts(texts) {
 
 async function embedText(text) {
     return (await embedTexts([text]))[0];
+}
+
+
+// Pre-warm the neural embedding pipeline in the background on startup
+// so users don't have to wait for model download on their first upload!
+if (getProvider() === "local" && process.env.NODE_ENV !== "test") {
+    setTimeout(() => {
+        getPipeline().catch((err) => {
+            console.warn("Background embedding warm-up notice:", err.message);
+        });
+    }, 1500);
 }
 
 module.exports = {
