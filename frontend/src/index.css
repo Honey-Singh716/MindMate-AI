@@ -1,9 +1,224 @@
+:root {
+  --bg-void: #05050A;
+  --bg-primary: #09090F;
+  --bg-sidebar: #11111A;
+  --bg-surface: #161620;
+  --bg-elevated: #1C1B28;
+  --bg-glass: rgba(22, 22, 32, 0.72);
+  --bg-glass-heavy: rgba(17, 17, 26, 0.88);
+  --bg-glass-input: rgba(14, 14, 22, 0.85);
+
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-medium: rgba(255, 255, 255, 0.14);
+  --border-focus: rgba(180, 154, 255, 0.5);
+  --border-glow: rgba(128, 87, 229, 0.4);
+
+  --primary: #8057E5;
+  --primary-hover: #926bf3;
+  --primary-active: #7146d9;
+  --primary-glow: rgba(128, 87, 229, 0.35);
+
+  --accent: #B49AFF;
+  --accent-pink: #F368E0;
+  --accent-magenta: #D946EF;
+  --accent-violet: #A855F7;
+  --accent-cyan: #38BDF8;
+
+  --text-primary: #F5F3FA;
+  --text-secondary: #9995AB;
+  --text-muted: #6B677F;
+  
+  --danger: #FF6B81;
+  --danger-bg: rgba(255, 107, 129, 0.12);
+  --danger-border: rgba(255, 107, 129, 0.28);
+  --warning: #F59E0B;
+  --warning-bg: rgba(245, 158, 11, 0.12);
+  --warning-border: rgba(245, 158, 11, 0.28);
+  --success: #10B981;
+  --success-bg: rgba(16, 185, 129, 0.12);
+
+  --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.55);
+  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.7);
+  --shadow-glow: 0 0 32px rgba(128, 87, 229, 0.25);
+  --shadow-glow-pink: 0 0 32px rgba(243, 104, 224, 0.22);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  color-scheme: dark;
+}
+
 html, body, #root {
   min-width: 320px;
   min-height: 100%;
   margin: 0;
+  padding: 0;
 }
 
 body {
-  background: #0e0e13;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  selection-background-color: var(--primary);
+  selection-color: #ffffff;
+}
+
+::selection {
+  background: rgba(128, 87, 229, 0.45);
+  color: #FFFFFF;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.025em;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button, input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  outline: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(180, 154, 255, 0.35);
+}
+
+/* Keyframe animations */
+@keyframes neuralPulse {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes synapseFlashes {
+  0%, 100% {
+    opacity: 0.2;
+    filter: drop-shadow(0 0 2px rgba(180, 154, 255, 0.2));
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 16px rgba(243, 104, 224, 0.8));
+  }
+}
+
+@keyframes particleDrift {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-18px) rotate(180deg);
+  }
+  100% {
+    transform: translateY(0px) rotate(360deg);
+  }
+}
+
+@keyframes floatGentle {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes orbBreathe {
+  0%, 100% {
+    transform: scale(1) translate(-50%, -50%);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.15) translate(-45%, -52%);
+    opacity: 0.95;
+  }
+}
+
+@keyframes spinSlow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
