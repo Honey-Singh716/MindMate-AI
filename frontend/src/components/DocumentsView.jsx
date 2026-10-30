@@ -138,7 +138,7 @@ export default function DocumentsView({
           )}
         </div>
 
-        {(uploadError || error) && (
+        {(uploadError || (error && !error.toLowerCase().includes('conversation'))) && (
           <div className="doc-error-banner animate-fade-in" role="alert">
             <span className="error-icon">⚠</span>
             <span>{uploadError || error}</span>

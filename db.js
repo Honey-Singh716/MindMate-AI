@@ -14,9 +14,13 @@ function getPool() {
         throw new Error("DATABASE_URL is missing.");
     }
     if (!pool) {
+        // Neon and cloud PostgreSQL instances always require SSL.
+        const isNeon = process.env.DATABASE_URL.includes("neon.tech") ||
+            process.env.DATABASE_URL.includes("sslmode=require");
+        const useSsl = process.env.NODE_ENV === "production" || isNeon;
         pool = new Pool({
             connectionString: process.env.DATABASE_URL,
-            ssl: process.env.NODE_ENV === "production"
+            ssl: useSsl
                 ? { rejectUnauthorized: false }
                 : false,
         });
@@ -261,7 +265,7 @@ async function addChunks(documentId, ownerId, chunks) {
         for (let i = 0; i < slice.length; i += 1) {
             const chunk = slice[i];
             const base = i * 7;
-            values.push(`(${base + 1}, ${base + 2}, ${base + 3}, ${base + 4}, ${base + 5}, ${base + 6}, ${base + 7}${useVector ? "::vector" : "::jsonb"})`);
+            values.push(`($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}${useVector ? "::vector" : "::jsonb"})`);
             params.push(
                 crypto.randomUUID(),
                 documentId,

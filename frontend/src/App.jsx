@@ -109,10 +109,13 @@ export default function App() {
       const list = data.conversations || []
       setConversations(list)
       if (list.length === 0) {
+        // No conversations yet — clear active so the next message auto-creates one
         setActive(null)
       } else if (!currentActiveId || !list.some((c) => c.id === currentActiveId)) {
+        // Active conversation was deleted or is stale — switch to the most recent one
         selectConversation(list[0].id)
       }
+      // If currentActiveId exists in the list, keep the existing active state (no extra fetch)
     } catch (e) {
       console.error('Failed to load conversations:', e)
     }
@@ -123,8 +126,12 @@ export default function App() {
       const data = await api(`/api/conversations/${encodeURIComponent(id)}`)
       setActive(data.conversation)
       setLastSources([])
+      setError('')
     } catch (e) {
       console.error('Failed to fetch conversation:', e)
+      if (e.status === 404 || e.message === 'Conversation not found.') {
+        setActive(null)
+      }
     }
   }
 
@@ -211,8 +218,9 @@ export default function App() {
       setLastSources(Array.isArray(data.sources) ? data.sources : [])
       await loadConversations(data.conversation.id)
     } catch (requestError) {
-      // Auto-recover if conversation was wiped, missing, or deleted
-      if (requestError.message === 'Conversation not found.' || requestError.payload?.error === 'Conversation not found.') {
+      // Auto-recover if conversation was wiped on a server restart.
+      // Silently create a new conversation and retry — no error banner shown to user.
+      if (requestError.status === 404 || requestError.message === 'Conversation not found.' || requestError.payload?.error === 'Conversation not found.') {
         try {
           const fresh = await createConversation()
           if (fresh) {
@@ -262,7 +270,7 @@ export default function App() {
       setPlan(data.plan)
       showToast('Study curriculum synthesized successfully')
     } catch (requestError) {
-      if (requestError.message === 'Conversation not found.' || requestError.payload?.error === 'Conversation not found.') {
+      if (requestError.status === 404 || requestError.message === 'Conversation not found.' || requestError.payload?.error === 'Conversation not found.') {
         try {
           const fresh = await createConversation()
           if (fresh) {

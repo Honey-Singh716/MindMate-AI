@@ -29,6 +29,7 @@ export async function api(path, options = {}, token = localStorage.getItem('mind
   if (!response.ok) {
     const err = new Error(data.error || 'Something went wrong. Please try again.')
     err.payload = data
+    err.status = response.status
     throw err
   }
   return data
@@ -51,7 +52,10 @@ export async function apiUpload(path, formData, token = localStorage.getItem('mi
   })
   const data = await response.json().catch(() => ({}))
   if (!response.ok) {
-    throw new Error(data.error || 'Upload failed. Please try again.')
+    const err = new Error(data.error || 'Upload failed. Please try again.')
+    err.payload = data
+    err.status = response.status
+    throw err
   }
   return data
 }
