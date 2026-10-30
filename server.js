@@ -1,4 +1,5 @@
 const fs = require("node:fs/promises");
+const fsSync = require("node:fs");
 const path = require("node:path");
 const http = require("node:http");
 const crypto = require("node:crypto");
@@ -19,7 +20,7 @@ const rag = require("./rag");
 const embeddings = require("./embeddings");
 
 const PORT = Number(process.env.PORT) || 3000;
-const PUBLIC_DIR = path.join(__dirname, "public");
+const PUBLIC_DIR = process.env.PUBLIC_DIR || (fsSync.existsSync(path.join(__dirname, "frontend", "dist")) ? path.join(__dirname, "frontend", "dist") : path.join(__dirname, "public"));
 const HISTORY_FILE = process.env.HISTORY_FILE || path.join(__dirname, "chat-history.json");
 const MOCK_MODE = /^(1|true|yes)$/i.test(process.env.MOCK_MODE || "");
 const MAX_RECENT_MESSAGES = 10;
