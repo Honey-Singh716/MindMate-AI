@@ -1,28 +1,27 @@
 # render.yaml — Render deployment configuration for MindMate AI backend.
 # Reference: https://render.com/docs/infrastructure-as-code
 #
-# Health-check path: GET /api/health
-# This endpoint returns HTTP 200 with no auth, no DB queries, no secrets.
-# Render uses it to confirm the dyno is up after each deploy.
-# UptimeRobot (or any external monitor) should ping the same path every
-# 14 minutes to prevent the free-tier dyno from sleeping.
+# Build failure root cause (fixed here):
+#   Render sets NODE_ENV=production during build, which makes plain
+#   "npm install" skip devDependencies. Vite lives in devDependencies,
+#   so the build shell could not find it → "sh: 1: vite: not found".
+#   Fix: use "npm ci --include=dev" for the frontend install step so
+#   devDependencies (vite, @vitejs/plugin-react) are always installed.
 
 services:
   - type: web
     name: mindmate-ai
     runtime: node
-    plan: free                        # change to "starter" or higher to eliminate cold starts
-    region: oregon                    # match your database region to minimize latency
-    buildCommand: npm install && npm run build
+    plan: free
+    region: oregon
+    buildCommand: npm install && npm ci --include=dev --prefix frontend && npm run build --prefix frontend
     startCommand: npm start
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        generateValue: false          # Render injects PORT automatically — leave unset here
       - key: GROQ_API_KEY
-        sync: false                   # set manually in Render dashboard → Environment
+        sync: false
       - key: JWT_SECRET
         sync: false
       - key: DATABASE_URL
@@ -36,4 +35,4 @@ services:
       - key: EMBEDDING_DIM
         value: "384"
       - key: CORS_ORIGIN
-        sync: false                   # set to your Vercel URL if needed, e.g. https://mind-mate-ai-theta.vercel.app
+        sync: false
