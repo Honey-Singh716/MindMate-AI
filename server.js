@@ -1139,6 +1139,14 @@ async function main() {
         await saveStore(store);
     }
     const server = http.createServer(async (request, response) => {
+        // Apply CORS headers to every request (including preflight OPTIONS).
+        applyCorsHeaders(request, response);
+        // Handle CORS preflight immediately - no further processing needed.
+        if (request.method === "OPTIONS") {
+            response.writeHead(204);
+            response.end();
+            return;
+        }
         try {
             if (request.url.startsWith("/api/")) {
                 await handleApi(request, response, store);
