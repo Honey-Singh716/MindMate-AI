@@ -1,12 +1,13 @@
-// health.test.js — verifies GET /api/health without auth always returns 200.
+// health.test.js — regression tests for GET /api/health and HEAD /api/health.
 //
-// This test spawns the real server on a dedicated port. It does NOT need
-// PostgreSQL, Groq, or any env vars beyond what .env already provides.
-// It is NOT skipped — it runs on every `npm test`.
+// Root cause of the UptimeRobot 401 incident (Oct 31 2026):
+// UptimeRobot sends HEAD requests by default, not GET. The route only matched
+// GET, so HEAD fell through to the global auth guard → 401 Unauthorized.
+// Fix: the route now matches both GET and HEAD.
 //
-// Regression guard: this test would have caught the Render 401 incident.
-// If it ever fails with 401 it means the health route has been moved
-// below the global auth guard in server.js, which must be reverted.
+// These tests spawn the real server on a dedicated port.
+// They do NOT need PostgreSQL, Groq, or any paid services.
+// They are NOT skipped — they run on every `npm test`.
 
 require("dotenv").config();
 
@@ -18,19 +19,19 @@ const path = require("node:path");
 const fs = require("node:fs/promises");
 const { spawn } = require("node:child_process");
 
-const PORT = 5201; // dedicated port — does not clash with dev server or other tests
+const PORT = 5201;
 
-function get(urlPath) {
+function httpRequest(method, urlPath) {
     return new Promise((resolve, reject) => {
         const req = http.request(
-            { host: "127.0.0.1", port: PORT, method: "GET", path: urlPath },
+            { host: "127.0.0.1", port: PORT, method, path: urlPath },
             (res) => {
                 let body = "";
                 res.on("data", (c) => (body += c));
                 res.on("end", () => {
                     let json = {};
                     try { json = JSON.parse(body); } catch { json = { raw: body }; }
-                    resolve({ status: res.statusCode, json });
+                    resolve({ status: res.statusCode, headers: res.headers, json, body });
                 });
             }
         );
@@ -54,9 +55,6 @@ async function startServer() {
                 PORT: String(PORT),
                 EMBEDDING_PROVIDER: "mock",
                 HISTORY_FILE: tempHistory,
-                // Intentionally omit DATABASE_URL to confirm health route
-                // does NOT need the DB (it must respond before any DB call).
-                DATABASE_URL: process.env.DATABASE_URL || "",
             },
             stdio: ["ignore", "pipe", "pipe"],
         });
@@ -70,47 +68,60 @@ async function startServer() {
         serverProc.stdout.on("data", onData);
         serverProc.stderr.on("data", onData);
         serverProc.on("error", reject);
-        setTimeout(() => !ready && reject(new Error("server did not start within 12 s")), 12000);
+        setTimeout(() => !ready && reject(new Error("server did not start within 12s")), 12000);
     });
 }
 
 function stopServer() {
-    if (serverProc) serverProc.kill("SIGTERM");
+    if (serverProc) { serverProc.kill("SIGTERM"); serverProc = null; }
 }
 
+// --- GET ---
 test("GET /api/health returns 200 with no Authorization header", async () => {
     await startServer();
     try {
-        const res = await get("/api/health");
-
-        // Must be 200 — never 401, never 404, never 500.
+        const res = await httpRequest("GET", "/api/health");
         assert.equal(res.status, 200,
-            `Expected HTTP 200 but got ${res.status}. ` +
-            `If this is 401 the health route has been moved below the auth guard. ` +
-            `If this is 404 the route is missing. Body: ${JSON.stringify(res.json)}`
+            `Expected 200 got ${res.status}. If 401: route is below auth guard. Body: ${JSON.stringify(res.json)}`
         );
-
-        // Response shape validation.
-        assert.equal(res.json.status, "ok", `Expected status "ok", got: ${JSON.stringify(res.json)}`);
-        assert.equal(typeof res.json.uptime, "number", "uptime must be a number");
-        assert.equal(typeof res.json.timestamp, "string", "timestamp must be a string");
-        assert.match(res.json.timestamp, /^\d{4}-\d{2}-\d{2}T/, "timestamp must be ISO 8601");
-    } finally {
-        stopServer();
-        if (tempHistory) await fs.rm(tempHistory, { force: true }).catch(() => {});
-    }
+        assert.equal(res.json.status, "ok");
+        assert.equal(typeof res.json.uptime, "number");
+        assert.match(res.json.timestamp, /^\d{4}-\d{2}-\d{2}T/);
+    } finally { stopServer(); await fs.rm(tempHistory, { force: true }).catch(() => {}); }
 });
 
+// --- HEAD (this is what UptimeRobot sends by default) ---
+test("HEAD /api/health returns 200 with no body — matches UptimeRobot behaviour", async () => {
+    await startServer();
+    try {
+        const res = await httpRequest("HEAD", "/api/health");
+
+        // This assertion would have caught the Oct 31 2026 incident.
+        // If it fails with 401, the HEAD method is not handled before the auth guard.
+        assert.equal(res.status, 200,
+            `HEAD /api/health returned ${res.status}. ` +
+            `UptimeRobot sends HEAD — if this is 401 the route does not handle HEAD. ` +
+            `Body: ${res.body}`
+        );
+
+        // HEAD responses must have correct Content-Type but empty body (HTTP spec).
+        assert.match(res.headers["content-type"] || "", /application\/json/,
+            "Content-Type header should be application/json even for HEAD"
+        );
+        assert.equal(res.body, "",
+            "HEAD response must have an empty body per HTTP spec"
+        );
+    } finally { stopServer(); await fs.rm(tempHistory, { force: true }).catch(() => {}); }
+});
+
+// --- Response time ---
 test("GET /api/health responds in under 500 ms", async () => {
     await startServer();
     try {
         const start = Date.now();
-        const res = await get("/api/health");
+        const res = await httpRequest("GET", "/api/health");
         const ms = Date.now() - start;
         assert.equal(res.status, 200);
         assert.ok(ms < 500, `Health check took ${ms} ms — expected under 500 ms`);
-    } finally {
-        stopServer();
-        if (tempHistory) await fs.rm(tempHistory, { force: true }).catch(() => {});
-    }
+    } finally { stopServer(); await fs.rm(tempHistory, { force: true }).catch(() => {}); }
 });

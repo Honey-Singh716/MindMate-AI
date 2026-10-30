@@ -874,16 +874,28 @@ async function handleApi(request, response, store) {
     // IMPORTANT: every route in this block MUST return before the global
     // authenticateRequest() guard that follows. Adding auth to this block
     // breaks UptimeRobot and Render's own health-check probes.
-    if (request.method === "GET" && url.pathname === "/api/health") {
+    if ((request.method === "GET" || request.method === "HEAD") && url.pathname === "/api/health") {
         // No auth. No DB. No secrets. Safe to call at any frequency.
-        // UptimeRobot pings this every 14 min to prevent Render free-tier sleep.
+        // Handles both GET and HEAD — UptimeRobot sends HEAD by default.
         // Render itself uses healthCheckPath: /api/health in render.yaml.
-        sendJson(response, 200, {
+        // HEAD responses must NOT include a body (HTTP spec), so we write
+        // headers only and skip response.end(body) for HEAD requests.
+        const payload = JSON.stringify({
             status: "ok",
             uptime: Math.floor(process.uptime()),
             timestamp: new Date().toISOString(),
         });
-        logEvent("health_check");
+        response.writeHead(200, {
+            "Content-Type": "application/json; charset=utf-8",
+            "Content-Length": Buffer.byteLength(payload),
+            "Cache-Control": "no-store",
+        });
+        if (request.method === "HEAD") {
+            response.end(); // headers only — no body for HEAD
+        } else {
+            response.end(payload);
+        }
+        logEvent("health_check", { method: request.method });
         return; // ← MUST stay here — do not move below the auth guard
     }
     // ── END PUBLIC ROUTES ─────────────────────────────────────────────────
