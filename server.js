@@ -1,4 +1,4 @@
-const fs = require("node:fs/promises");
+﻿const fs = require("node:fs/promises");
 const fsSync = require("node:fs");
 const path = require("node:path");
 const http = require("node:http");
@@ -30,6 +30,36 @@ const MAX_MESSAGE_LENGTH = 8000;
 const RATE_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT = 60;
 const AUTH_RATE_LIMIT = 10;
+
+// --- CORS ---
+// Allowed origins: the production Vercel frontend + localhost for development.
+// Additional origins can be injected via the CORS_ORIGIN env var (comma-separated).
+const ALLOWED_ORIGINS = new Set([
+    "https://mind-mate-ai-theta.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:4173",
+    "http://localhost:3000",
+]);
+if (process.env.CORS_ORIGIN) {
+    for (const o of process.env.CORS_ORIGIN.split(",")) {
+        const trimmed = o.trim();
+        if (trimmed) ALLOWED_ORIGINS.add(trimmed);
+    }
+}
+
+function applyCorsHeaders(request, response) {
+    const origin = request.headers.origin || "";
+    if (ALLOWED_ORIGINS.has(origin)) {
+        response.setHeader("Access-Control-Allow-Origin", origin);
+        response.setHeader("Vary", "Origin");
+    }
+    response.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS");
+    response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    response.setHeader("Access-Control-Allow-Credentials", "true");
+    response.setHeader("Access-Control-Max-Age", "86400");
+}
+// ---
+
 
 let ai;
 const rateBuckets = new Map();

@@ -5,22 +5,10 @@ import AppLayout from './components/AppLayout'
 import AIChatView from './components/AIChatView'
 import StudyPlannerView from './components/StudyPlannerView'
 import DocumentsView from './components/DocumentsView'
+import { api, apiUpload } from './api'
 import './App.css'
 
 const tokenKey = 'mindmate_token'
-
-async function api(path, options = {}, token = localStorage.getItem(tokenKey)) {
-  const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) }
-  if (token) headers.Authorization = `Bearer ${token}`
-  const response = await fetch(path, { ...options, headers })
-  const data = await response.json().catch(() => ({}))
-  if (!response.ok) {
-    const err = new Error(data.error || 'Something went wrong.')
-    err.payload = data
-    throw err
-  }
-  return data
-}
 
 export default function App() {
   const [user, setUser] = useState(null)
@@ -253,13 +241,7 @@ export default function App() {
     try {
       const fd = new FormData()
       fd.append('file', file)
-      const res = await fetch('/api/documents', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${localStorage.getItem(tokenKey)}` },
-        body: fd,
-      })
-      const data = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(data.error || 'Upload failed.')
+      const data = await apiUpload('/api/documents', fd)
       await loadDocuments()
       showToast(`Document "${data.filename || file.name}" indexed successfully!`)
       // Automatically enable RAG mode so user can query immediately

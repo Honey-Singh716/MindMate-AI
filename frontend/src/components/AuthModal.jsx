@@ -1,6 +1,9 @@
 import { useState } from 'react'
+import { api as centralApi } from '../api'
 
-export default function AuthModal({ initialMode = 'login', onAuthenticated, onClose, api, tokenKey }) {
+export default function AuthModal({ initialMode = 'login', onAuthenticated, onClose, api: legacyApi, tokenKey }) {
+  // Prefer the centralized api (with correct base URL) over the prop-passed one
+  const api = centralApi
   const [mode, setMode] = useState(initialMode)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
