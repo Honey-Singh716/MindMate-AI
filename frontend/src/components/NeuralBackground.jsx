@@ -10,6 +10,7 @@ import { useEffect, useRef } from 'react'
 export default function NeuralBackground({
   interactive = true,
   density = 'normal',
+  transparent = true,
   className = '',
 }) {
   const canvasRef = useRef(null)
@@ -132,21 +133,23 @@ export default function NeuralBackground({
     function drawStaticFrame() {
       ctx.clearRect(0, 0, width, height)
 
-      // Ambient radial glow centered behind the right preview
-      const gradCenter = width > 900 ? width * 0.72 : width * 0.5
-      const bgGrad = ctx.createRadialGradient(
-        gradCenter,
-        height * 0.42,
-        30,
-        gradCenter,
-        height * 0.42,
-        Math.max(width, height) * 0.65
-      )
-      bgGrad.addColorStop(0, '#154033')
-      bgGrad.addColorStop(0.5, '#102D25')
-      bgGrad.addColorStop(1, '#0C211B')
-      ctx.fillStyle = bgGrad
-      ctx.fillRect(0, 0, width, height)
+      // Ambient radial glow (only when not transparent/standalone)
+      if (!transparent) {
+        const gradCenter = width > 900 ? width * 0.72 : width * 0.5
+        const bgGrad = ctx.createRadialGradient(
+          gradCenter,
+          height * 0.42,
+          30,
+          gradCenter,
+          height * 0.42,
+          Math.max(width, height) * 0.65
+        )
+        bgGrad.addColorStop(0, '#154033')
+        bgGrad.addColorStop(0.5, '#102D25')
+        bgGrad.addColorStop(1, '#0C211B')
+        ctx.fillStyle = bgGrad
+        ctx.fillRect(0, 0, width, height)
+      }
 
       // Connections
       const maxDistance = Math.min(width, height) * 0.24
@@ -187,21 +190,23 @@ export default function NeuralBackground({
 
       ctx.clearRect(0, 0, width, height)
 
-      // Deep forest gradient
-      const gradCenter = width > 900 ? width * 0.72 : width * 0.5
-      const bgGrad = ctx.createRadialGradient(
-        gradCenter,
-        height * 0.42,
-        30,
-        gradCenter,
-        height * 0.42,
-        Math.max(width, height) * 0.65
-      )
-      bgGrad.addColorStop(0, '#143D30')
-      bgGrad.addColorStop(0.55, '#102D25')
-      bgGrad.addColorStop(1, '#0C211B')
-      ctx.fillStyle = bgGrad
-      ctx.fillRect(0, 0, width, height)
+      // Deep forest gradient (only when not transparent)
+      if (!transparent) {
+        const gradCenter = width > 900 ? width * 0.72 : width * 0.5
+        const bgGrad = ctx.createRadialGradient(
+          gradCenter,
+          height * 0.42,
+          30,
+          gradCenter,
+          height * 0.42,
+          Math.max(width, height) * 0.65
+        )
+        bgGrad.addColorStop(0, '#143D30')
+        bgGrad.addColorStop(0.55, '#102D25')
+        bgGrad.addColorStop(1, '#0C211B')
+        ctx.fillStyle = bgGrad
+        ctx.fillRect(0, 0, width, height)
+      }
 
       // Update & render knowledge nodes
       const maxDistance = Math.min(width, height) * 0.24
@@ -289,7 +294,7 @@ export default function NeuralBackground({
         cancelAnimationFrame(animFrameId.current)
       }
     }
-  }, [density, interactive])
+  }, [density, interactive, transparent])
 
   return (
     <canvas
@@ -302,7 +307,9 @@ export default function NeuralBackground({
         width: '100%',
         height: '100%',
         pointerEvents: 'none',
-        zIndex: 1,
+        zIndex: 2,
+        opacity: transparent ? 0.38 : 1,
+        transition: 'opacity 0.6s ease',
       }}
       aria-hidden="true"
     />

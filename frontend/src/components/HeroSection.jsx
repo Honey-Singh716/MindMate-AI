@@ -1,12 +1,76 @@
+import { useEffect, useRef } from 'react'
 import NeuralBackground from './NeuralBackground'
 
 export default function HeroSection({ onStartLearning, onExploreProduct }) {
+  const heroRef = useRef(null)
+  const bgPhotoRef = useRef(null)
+  const warmthRef = useRef(null)
+
+  useEffect(() => {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (prefersReducedMotion) return
+
+    const heroEl = heroRef.current
+    if (!heroEl) return
+
+    let rafId = null
+
+    function handleMouseMove(e) {
+      if (rafId) cancelAnimationFrame(rafId)
+      rafId = requestAnimationFrame(() => {
+        const rect = heroEl.getBoundingClientRect()
+        // Normalized offsets from center (-0.5 to 0.5)
+        const normX = (e.clientX - rect.left) / rect.width - 0.5
+        const normY = (e.clientY - rect.top) / rect.height - 0.5
+
+        // Subtle, restrained photographic parallax
+        if (bgPhotoRef.current) {
+          bgPhotoRef.current.style.transform = `scale(1.025) translate(${normX * -14}px, ${normY * -10}px)`
+        }
+        if (warmthRef.current) {
+          warmthRef.current.style.transform = `translate(${normX * 10}px, ${normY * 8}px)`
+        }
+      })
+    }
+
+    function handleMouseLeave() {
+      if (rafId) cancelAnimationFrame(rafId)
+      if (bgPhotoRef.current) {
+        bgPhotoRef.current.style.transform = 'scale(1.02) translate(0px, 0px)'
+      }
+      if (warmthRef.current) {
+        warmthRef.current.style.transform = 'translate(0px, 0px)'
+      }
+    }
+
+    heroEl.addEventListener('mousemove', handleMouseMove, { passive: true })
+    heroEl.addEventListener('mouseleave', handleMouseLeave, { passive: true })
+
+    return () => {
+      heroEl.removeEventListener('mousemove', handleMouseMove)
+      heroEl.removeEventListener('mouseleave', handleMouseLeave)
+      if (rafId) cancelAnimationFrame(rafId)
+    }
+  }, [])
+
   return (
-    <section className="hero-section">
-      {/* Subtle academic knowledge network behind the right preview */}
+    <section className="hero-section" ref={heroRef}>
+      {/* 1. Cinematic Photographic Academic Study Atmosphere Layer */}
+      <div className="hero-atmosphere-layer" aria-hidden="true">
+        <div className="hero-bg-photo" ref={bgPhotoRef}></div>
+        {/* Directional sophisticated Forest Green overlays */}
+        <div className="hero-overlay-directional"></div>
+        {/* Soft vignette framing */}
+        <div className="hero-overlay-vignette"></div>
+        {/* Warm amber lamp atmosphere */}
+        <div className="hero-overlay-warmth" ref={warmthRef}></div>
+      </div>
+
+      {/* 2. Subtle academic knowledge network behind the right preview */}
       <NeuralBackground
         interactive={true}
         density="normal"
+        transparent={true}
       />
 
       <div className="hero-content-wrapper">
