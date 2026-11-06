@@ -5,7 +5,7 @@ export default function AppLayout({
   user,
   view,
   setView,
-  conversations,
+  conversations = [],
   activeConversation,
   onSelectConversation,
   onCreateConversation,
@@ -29,14 +29,26 @@ export default function AppLayout({
   const [userMenuOpen, setUserMenuOpen] = useState(false)
 
   const viewTitles = {
-    chat: 'AI Chat Studio',
+    chat: 'AI Study Studio',
     planner: 'Study Planner',
-    documents: 'Knowledge Base',
+    documents: 'Documents & Knowledge Base',
+    explorer: 'Concept Explorer',
+    notes: 'Smart Study Notes',
+    flashcards: 'Active Recall Flashcards',
   }
+
+  const activeSubtitle =
+    view === 'chat'
+      ? activeConversation?.title || 'Grounded Academic Tutor'
+      : view === 'planner'
+      ? 'Milestone Curriculum Synthesizer'
+      : view === 'documents'
+      ? 'pgvector Semantic Store'
+      : 'Academic Learning Tools'
 
   return (
     <div className={`workspace-shell ${collapsed ? 'sidebar-collapsed' : ''}`}>
-      {/* Mobile Backdrop */}
+      {/* Mobile Drawer Backdrop */}
       {mobileMenuOpen && (
         <div
           className="mobile-backdrop animate-fade-in"
@@ -44,11 +56,15 @@ export default function AppLayout({
         />
       )}
 
-      {/* Collapsible Left Sidebar */}
+      {/* Refined Academic Left Sidebar */}
       <aside className={`workspace-sidebar ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-        {/* Brand Header */}
+        {/* Top Brand Header */}
         <div className="sidebar-brand-row">
-          <div className="sidebar-brand" onClick={onGoToLanding} title="MindMate — Return to Landing Page">
+          <div
+            className="sidebar-brand"
+            onClick={onGoToLanding}
+            title="MindMate — Return to Landing Page"
+          >
             <span className="academic-logo-badge">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#F5F3EB" />
@@ -74,7 +90,7 @@ export default function AppLayout({
           </button>
         </div>
 
-        {/* New Conversation Button */}
+        {/* Primary Action: New Conversation */}
         <div className="sidebar-action-wrap">
           <button
             className="new-chat-action-btn"
@@ -83,14 +99,14 @@ export default function AppLayout({
               setView('chat')
               setMobileMenuOpen(false)
             }}
-            title="Start a new conversation"
+            title="Start a new conversation thread"
           >
             <span className="btn-plus">＋</span>
-            {!collapsed && <span>New conversation</span>}
+            {!collapsed && <span>New Conversation</span>}
           </button>
         </div>
 
-        {/* Main Navigation Tabs */}
+        {/* Main Navigation Items */}
         <nav className="sidebar-nav-tabs">
           <button
             className={`nav-tab-item ${view === 'chat' ? 'active' : ''}`}
@@ -130,9 +146,48 @@ export default function AppLayout({
             {!collapsed && <span className="nav-tab-text">Documents</span>}
             {view === 'documents' && <span className="active-glow-bar"></span>}
           </button>
+
+          <button
+            className={`nav-tab-item ${view === 'explorer' ? 'active' : ''}`}
+            onClick={() => {
+              setView('explorer')
+              setMobileMenuOpen(false)
+            }}
+            title="Concept Explorer"
+          >
+            <span className="nav-tab-icon">✦</span>
+            {!collapsed && <span className="nav-tab-text">Concept Explorer</span>}
+            {view === 'explorer' && <span className="active-glow-bar"></span>}
+          </button>
+
+          <button
+            className={`nav-tab-item ${view === 'notes' ? 'active' : ''}`}
+            onClick={() => {
+              setView('notes')
+              setMobileMenuOpen(false)
+            }}
+            title="Smart Notes"
+          >
+            <span className="nav-tab-icon">📝</span>
+            {!collapsed && <span className="nav-tab-text">Notes</span>}
+            {view === 'notes' && <span className="active-glow-bar"></span>}
+          </button>
+
+          <button
+            className={`nav-tab-item ${view === 'flashcards' ? 'active' : ''}`}
+            onClick={() => {
+              setView('flashcards')
+              setMobileMenuOpen(false)
+            }}
+            title="Active Recall Flashcards"
+          >
+            <span className="nav-tab-icon">🗂</span>
+            {!collapsed && <span className="nav-tab-text">Flashcards</span>}
+            {view === 'flashcards' && <span className="active-glow-bar"></span>}
+          </button>
         </nav>
 
-        {/* Recent Conversations List */}
+        {/* Recent Conversations History Section */}
         {!collapsed && (
           <div className="sidebar-history-section">
             <div className="history-section-header">
@@ -160,11 +215,15 @@ export default function AppLayout({
                         }}
                         title={conv.title}
                       >
-                        {conv.pinned && <span className="pin-indicator" title="Pinned conversation">●</span>}
+                        {conv.pinned && (
+                          <span className="pin-indicator" title="Pinned thread">
+                            ●
+                          </span>
+                        )}
                         <span className="thread-title-text">{conv.title}</span>
                       </button>
 
-                      {/* 3-Dot Actions Menu */}
+                      {/* 3-Dot Actions Dropdown */}
                       <details className="thread-menu-dropdown">
                         <summary aria-label={`Actions for ${conv.title}`}>⋯</summary>
                         <div className="thread-menu-popover">
@@ -203,7 +262,7 @@ export default function AppLayout({
           </div>
         )}
 
-        {/* Bottom Profile Area */}
+        {/* Bottom Profile & Actions Area */}
         <div className="sidebar-bottom-panel">
           {!collapsed ? (
             <div className="user-profile-card">
@@ -232,58 +291,66 @@ export default function AppLayout({
               title="Return to Landing Page"
             >
               <span className="footer-action-icon">🌐</span>
-              {!collapsed && <span>Landing page</span>}
+              {!collapsed && <span>Landing Page</span>}
             </button>
             <button
               className="footer-action-link logout-btn"
               onClick={onLogout}
-              title="Log out from MindMate"
+              title="Sign out of MindMate"
             >
               <span className="footer-action-icon">⎋</span>
-              {!collapsed && <span>Log out</span>}
+              {!collapsed && <span>Log Out</span>}
             </button>
           </div>
         </div>
       </aside>
 
-      {/* Main Workspace Column */}
+      {/* Main Workspace Canvas */}
       <div className="workspace-main-column">
-        {/* Top Header */}
+        {/* Clean Fixed Header */}
         <header className="workspace-topbar">
           <div className="topbar-left-cluster">
             {/* Mobile menu trigger */}
             <button
               className="mobile-sidebar-toggle"
               onClick={() => setMobileMenuOpen(true)}
-              aria-label="Open sidebar"
+              aria-label="Open sidebar menu"
             >
               ☰
             </button>
 
-            {/* Current Context Title */}
+            {/* Title & Contextual Subtitle */}
             <div className="topbar-context-badge">
               <span className="context-icon">✦</span>
-              <span className="context-title">{viewTitles[view] || 'Workspace'}</span>
+              <div className="context-title-col">
+                <span className="context-title">{viewTitles[view] || 'AI Study Studio'}</span>
+                <span className="context-subtitle">{activeSubtitle}</span>
+              </div>
             </div>
           </div>
 
           <div className="topbar-right-cluster">
-            {/* Dynamic Groq Model Selector (shown on Chat & Planner) */}
+            {/* Single Model Selector (shown on Chat & Planner) */}
             {view !== 'documents' && (
-              <ModelSelector
-                models={models}
-                selected={selectedModel}
-                loading={modelsLoading}
-                error={modelsError}
-                stale={modelsStale}
-                unavailable={modelUnavailable}
-                onChange={onChooseModel}
-                onRefresh={onRefreshModels}
-              />
+              <div
+                className="topbar-model-wrap"
+                title="Groq Neural Acceleration · Sub-second inference"
+              >
+                <ModelSelector
+                  models={models}
+                  selected={selectedModel}
+                  loading={modelsLoading}
+                  error={modelsError}
+                  stale={modelsStale}
+                  unavailable={modelUnavailable}
+                  onChange={onChooseModel}
+                  onRefresh={onRefreshModels}
+                />
+              </div>
             )}
 
-            {/* Private Workspace Status Indicator */}
-            <div className="private-workspace-pill desktop-only">
+            {/* Private Workspace Indicator */}
+            <div className="private-workspace-pill desktop-only" title="Your conversation and documents are private and isolated">
               <span className="status-live-dot"></span>
               <span>Private Workspace</span>
             </div>
@@ -294,6 +361,7 @@ export default function AppLayout({
                 className="topbar-avatar-btn"
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 aria-label="Account menu"
+                title={user.email}
               >
                 {user.email ? user.email.slice(0, 1).toUpperCase() : 'U'}
               </button>
@@ -315,7 +383,16 @@ export default function AppLayout({
                     ▦ Study Planner
                   </button>
                   <button onClick={() => { setUserMenuOpen(false); setView('documents'); }}>
-                    ▤ Documents
+                    ▤ Knowledge Base
+                  </button>
+                  <button onClick={() => { setUserMenuOpen(false); setView('explorer'); }}>
+                    ✦ Concept Explorer
+                  </button>
+                  <button onClick={() => { setUserMenuOpen(false); setView('notes'); }}>
+                    📝 Smart Notes
+                  </button>
+                  <button onClick={() => { setUserMenuOpen(false); setView('flashcards'); }}>
+                    🗂 Flashcards
                   </button>
                   <div className="dropdown-divider"></div>
                   <button

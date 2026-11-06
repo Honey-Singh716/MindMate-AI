@@ -5,6 +5,7 @@ import AppLayout from './components/AppLayout'
 import AIChatView from './components/AIChatView'
 import StudyPlannerView from './components/StudyPlannerView'
 import DocumentsView from './components/DocumentsView'
+import StudyToolsView from './components/StudyToolsView'
 import { api, apiUpload } from './api'
 import './App.css'
 
@@ -256,6 +257,22 @@ export default function App() {
     }
   }
 
+  async function handleRegenerate() {
+    const history = active?.history || []
+    for (let i = history.length - 1; i >= 0; i--) {
+      if (history[i].role === 'user') {
+        const lastUserText = history[i].parts?.map((p) => p.text).join('\n') || ''
+        if (lastUserText) {
+          setMessage(lastUserText)
+          setTimeout(() => {
+            sendMessage()
+          }, 30)
+          break
+        }
+      }
+    }
+  }
+
   async function generatePlan(event) {
     if (event) event.preventDefault()
     let currentActive = active
@@ -467,6 +484,19 @@ export default function App() {
               error={error}
               onSwitchToChat={() => handleSetView('chat')}
             />
+          ) : view === 'explorer' || view === 'notes' || view === 'flashcards' ? (
+            <StudyToolsView
+              type={view}
+              documents={documents}
+              onAskConcept={(conceptPrompt) => {
+                setMessage(conceptPrompt)
+                handleSetView('chat')
+                setTimeout(() => {
+                  sendMessage()
+                }, 50)
+              }}
+              onGoToChat={() => handleSetView('chat')}
+            />
           ) : (
             <AIChatView
               activeConversation={active}
@@ -481,6 +511,10 @@ export default function App() {
               lastSources={lastSources}
               hasDocuments={documents.length > 0}
               selectedModel={selectedModel}
+              onUploadDocument={uploadPdf}
+              uploading={uploading}
+              uploadError={uploadError}
+              onRegenerate={handleRegenerate}
             />
           )}
         </AppLayout>

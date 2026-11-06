@@ -15,31 +15,38 @@ export default function AIChatView({
   lastSources,
   hasDocuments,
   selectedModel,
+  onUploadDocument,
+  uploading,
+  uploadError,
+  onRegenerate,
 }) {
   const messagesScrollRef = useRef(null)
   const stickToBottom = useRef(true)
 
-  const suggestedPrompts = [
+  const academicPrompts = [
     {
       title: 'Explain a difficult concept',
-      prompt: 'Explain how attention mechanisms in transformers work using an intuitive analogy.',
+      prompt: 'Explain how attention mechanisms in transformers work using an intuitive analogy and step-by-step example.',
       icon: '💡',
+      rag: false,
     },
     {
-      title: 'Help me prepare for an exam',
-      prompt: 'Generate 5 challenging conceptual questions to test my understanding of distributed systems.',
-      icon: '🎯',
-    },
-    {
-      title: 'Summarize my study material',
-      prompt: 'Summarize the core takeaways and principles from my uploaded notes.',
+      title: 'Summarize my notes',
+      prompt: 'Summarize the core principles, definitions, and key takeaways from my uploaded study documents.',
       icon: '📝',
       rag: true,
     },
     {
-      title: 'Create a learning roadmap',
-      prompt: 'Build a step-by-step 4-week roadmap to master modern backend development with PostgreSQL and Node.js.',
-      icon: '🗺',
+      title: 'Help me understand this PDF',
+      prompt: 'Analyze the main methodology, assumptions, and algorithmic guarantees described in this document.',
+      icon: '▤',
+      rag: true,
+    },
+    {
+      title: 'Create revision questions',
+      prompt: 'Generate 5 challenging conceptual questions with answers to test my recall and understanding.',
+      icon: '🎯',
+      rag: false,
     },
   ]
 
@@ -53,7 +60,7 @@ export default function AIChatView({
   function handleScroll() {
     const el = messagesScrollRef.current
     if (!el) return
-    stickToBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 90
+    stickToBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 100
   }
 
   useLayoutEffect(() => {
@@ -66,72 +73,83 @@ export default function AIChatView({
     if (!activeConversation) {
       onCreateConversation().then(() => {
         setMessage(p.prompt)
-        if (p.rag && hasDocuments) setRagMode(true)
+        if (p.rag && hasDocuments && setRagMode) setRagMode(true)
       })
     } else {
       setMessage(p.prompt)
-      if (p.rag && hasDocuments) setRagMode(true)
+      if (p.rag && hasDocuments && setRagMode) setRagMode(true)
     }
   }
 
-  const hasHistory = activeConversation && activeConversation.history && activeConversation.history.length > 0
+  const hasHistory =
+    activeConversation &&
+    Array.isArray(activeConversation.history) &&
+    activeConversation.history.length > 0
 
   return (
-    <div className="neural-chat-workspace">
+    <div className="academic-chat-workspace">
       {!activeConversation || !hasHistory ? (
-        /* Empty State with Academic Emblem & Prompts */
-        <div className="chat-empty-state animate-fade-in">
-          <div className="academic-emblem-wrap">
-            <span className="academic-logo-badge large">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor" />
-                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="currentColor" fill="rgba(23, 76, 60, 0.08)" />
-                <circle cx="12" cy="10" r="1.5" fill="currentColor" />
-              </svg>
-            </span>
-          </div>
-
-          <span className="empty-eyebrow">AI STUDY TUTOR</span>
-          <h2 className="empty-title">Your knowledge, clarified.</h2>
-          <p className="empty-subtitle">
-            Ask questions, explore complex concepts, and examine study materials with grounded explanations.
-          </p>
-
-          {/* Suggested Prompt Cards */}
-          <div className="suggested-prompts-grid">
-            {suggestedPrompts.map((p, idx) => (
-              <button
-                key={idx}
-                className="prompt-suggestion-card"
-                onClick={() => handlePromptClick(p)}
-              >
-                <div className="prompt-top">
-                  <span className="prompt-icon">{p.icon}</span>
-                  <span className="prompt-title">{p.title}</span>
-                </div>
-                <p className="prompt-desc">"{p.prompt}"</p>
-                <span className="prompt-action">Try prompt →</span>
-              </button>
-            ))}
-          </div>
-
-          {!activeConversation && (
-            <div className="empty-action-wrap">
-              <button className="empty-start-btn" onClick={onCreateConversation}>
-                <span>Start New Conversation</span>
-                <span className="btn-sparkle">✦</span>
-              </button>
+        /* Thoughtful Academic Empty State */
+        <div className="chat-welcome-container animate-fade-in">
+          <div className="welcome-inner-wrap">
+            <div className="welcome-emblem">
+              <span className="emblem-book-icon">
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#174C3C" />
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#174C3C" fill="rgba(23, 76, 60, 0.08)" />
+                  <circle cx="12" cy="10" r="1.5" fill="#174C3C" />
+                </svg>
+              </span>
             </div>
-          )}
+
+            <span className="welcome-eyebrow">ACADEMIC STUDY TUTOR</span>
+            <h1 className="welcome-heading">What would you like to understand today?</h1>
+            <p className="welcome-subtext">
+              Ask questions, explore your study material, or upload a document to begin.
+            </p>
+
+            {/* 4 Suggested Academic Prompt Cards */}
+            <div className="welcome-prompts-grid">
+              {academicPrompts.map((p, idx) => (
+                <button
+                  key={idx}
+                  className="academic-prompt-card"
+                  onClick={() => handlePromptClick(p)}
+                  type="button"
+                >
+                  <div className="prompt-card-top">
+                    <span className="prompt-card-icon">{p.icon}</span>
+                    <strong className="prompt-card-title">{p.title}</strong>
+                    {p.rag && <span className="prompt-rag-badge">RAG</span>}
+                  </div>
+                  <p className="prompt-card-body">"{p.prompt}"</p>
+                  <span className="prompt-card-hint">Click to ask tutor →</span>
+                </button>
+              ))}
+            </div>
+
+            {!activeConversation && (
+              <div className="welcome-cta-strip">
+                <button
+                  className="welcome-primary-btn"
+                  onClick={onCreateConversation}
+                  type="button"
+                >
+                  <span>Start New Conversation</span>
+                  <span className="btn-sparkle">✦</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       ) : (
-        /* Messages Stream */
+        /* Message Stream */
         <div
-          className="chat-messages-scroll"
+          className="chat-stream-scroll-area"
           ref={messagesScrollRef}
           onScroll={handleScroll}
         >
-          <div className="messages-inner-container">
+          <div className="conversation-centering-container">
             {activeConversation.history.map((msg, index) => {
               const isLast = index === activeConversation.history.length - 1
               return (
@@ -140,44 +158,53 @@ export default function AIChatView({
                   message={msg}
                   isLastModel={isLast && msg.role === 'model'}
                   sources={lastSources}
+                  onRegenerate={isLast && msg.role === 'model' ? onRegenerate : undefined}
                 />
               )
             })}
 
             {/* Neural Thinking Indicator */}
             {busy && (
-              <div className="neural-thinking-pill animate-fade-in">
-                <span className="thinking-pulse-spark">✦</span>
-                <div className="thinking-dots">
-                  <span></span><span></span><span></span>
+              <div className="tutor-thinking-banner animate-fade-in">
+                <span className="thinking-sparkle">✦</span>
+                <div className="thinking-pulse-dots">
+                  <span></span>
+                  <span></span>
+                  <span></span>
                 </div>
-                <span className="thinking-text">MindMate is synthesizing neural pathways...</span>
+                <span className="thinking-status-text">
+                  MindMate is synthesizing grounded response...
+                </span>
               </div>
             )}
 
+            {/* Chat Error Banner */}
             {error && (
-              <div className="chat-error-banner animate-fade-in" role="alert">
+              <div className="academic-error-banner animate-fade-in" role="alert">
                 <span className="error-icon">⚠</span>
-                <span>{error}</span>
+                <div className="error-text-col">
+                  <strong>Notice</strong>
+                  <span>{error}</span>
+                </div>
               </div>
             )}
           </div>
         </div>
       )}
 
-      {/* Persistent Floating Input Dock */}
-      {activeConversation && (
-        <ChatInput
-          message={message}
-          setMessage={setMessage}
-          onSubmit={onSendMessage}
-          busy={busy}
-          ragMode={ragMode}
-          setRagMode={setRagMode}
-          hasDocuments={hasDocuments}
-          modelName={selectedModel}
-        />
-      )}
+      {/* Floating Composer Container */}
+      <ChatInput
+        message={message}
+        setMessage={setMessage}
+        onSubmit={onSendMessage}
+        busy={busy}
+        ragMode={ragMode}
+        setRagMode={setRagMode}
+        hasDocuments={hasDocuments}
+        onUploadDocument={onUploadDocument}
+        uploading={uploading}
+        uploadError={uploadError}
+      />
     </div>
   )
 }
