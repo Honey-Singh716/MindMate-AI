@@ -284,10 +284,15 @@ class ResponseCache {
 // ============================================================================
 const PROMPT_INJECTION_PATTERNS = [
     /ignore\s+(all\s+|previous\s+|above\s+)+instructions/i,
+    /(?:ignore|disregard|forget|override|replace|bypass)\s+(?:the\s+)?(?:system|developer|safety|security|prior|previous|above)\s+(?:message|prompt|instruction|rule|policy)/i,
     /system\s+prompt\s+override/i,
+    /(?:reveal|show|print|repeat|quote|summarize|disclose|extract)\s+(?:the\s+|your\s+)?(?:hidden|internal|secret|private|system|developer)\s+(?:prompt|instructions?|policy|configuration)/i,
     /reveal\s+(the\s+|your\s+)+(system\s+prompt|api\s+key|jwt_secret|groq_api_key|database_url)/i,
     /disregard\s+(all\s+)?prior\s+guidelines/i,
     /you\s+are\s+now\s+in\s+(developer\s+mode|dan\s+mode)/i,
+    /(?:act|pretend|behave)\s+as\s+(?:an?\s+)?(?:developer|administrator|system|jailbroken|unrestricted|different)\s+(?:assistant|ai|user|mode)/i,
+    /(?:developer|administrator|system)\s+(?:message|instruction|override)\s*:/i,
+    /(?:disable|turn\s+off|bypass|remove)\s+(?:all\s+)?(?:safety|security|content)\s+(?:rules?|filters?|restrictions?)/i,
     /bypass\s+(content\s+filter|safety\s+filter)/i,
 ];
 
@@ -598,4 +603,3 @@ module.exports = {
     globalTokenBudgets,
     globalConcurrencyLimiter,
 };
-
