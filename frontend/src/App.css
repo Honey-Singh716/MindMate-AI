@@ -2154,20 +2154,72 @@
 }
 
 /* --------------------------------------------------------------------------
-   8. FINAL CTA & FOOTER
+   8. FINAL CTA & FOOTER (Dark Academia Study Atmosphere)
    -------------------------------------------------------------------------- */
 .final-cta-section {
-  background: var(--forest-deep);
+  background: var(--forest-midnight);
   color: var(--text-on-forest);
-  padding: 100px 0 40px;
+  padding: 110px 0 36px;
   position: relative;
+  overflow: hidden;
+}
+
+/* Subtle Dark Academia Background Atmosphere */
+.final-cta-bg-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.final-cta-bg-image {
+  position: absolute;
+  inset: 0;
+  background-image: url('/final-cta-bg.jpg');
+  background-size: cover;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  opacity: 0.95;
+  filter: contrast(1.04) saturate(1.02);
+  transform: scale(1.01);
+  will-change: transform, opacity;
+}
+
+/* Dark Forest Directional Overlay:
+   - Subtle top shadow blending down from prior section
+   - Center negative space has deep forest-green support for clear reading
+   - Upper-left botanical shadows remain softly visible (0.45)
+   - Lower-right lamp glow and stacked books remain clearly visible (0.28-0.35) */
+.final-cta-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg,
+      rgba(10, 26, 20, 0.70) 0%,
+      rgba(12, 33, 27, 0.40) 25%,
+      rgba(12, 33, 27, 0.40) 70%,
+      rgba(10, 26, 20, 0.80) 100%
+    ),
+    linear-gradient(90deg,
+      rgba(12, 33, 27, 0.50) 0%,
+      rgba(12, 33, 27, 0.75) 25%,
+      rgba(12, 33, 27, 0.80) 50%,
+      rgba(12, 33, 27, 0.70) 75%,
+      rgba(12, 33, 27, 0.35) 100%
+    );
+  pointer-events: none;
 }
 
 .final-container {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 80px;
+  gap: 72px;
 }
 
 .final-content-box {
@@ -2195,7 +2247,7 @@
 }
 
 .final-heading {
-  font-size: clamp(36px, 4.5vw, 54px);
+  font-size: clamp(38px, 4.6vw, 56px);
   font-weight: 700;
   line-height: 1.12;
   letter-spacing: -0.025em;
@@ -2210,105 +2262,197 @@
 }
 
 .final-supporting-text {
-  font-size: 16.5px;
+  font-size: 16px;
   line-height: 1.6;
   color: var(--text-on-forest-2);
-  max-width: 540px;
+  max-width: 560px;
 }
 
 .final-actions {
-  padding-top: 10px;
+  padding-top: 6px;
 }
 
 .final-cta-btn {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 15px 36px;
+  padding: 14px 34px;
   border-radius: 999px;
   background: var(--ivory-warm);
   color: var(--forest-deep);
-  font-size: 15px;
+  font-size: 14.5px;
   font-weight: 600;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  border: none;
 }
 
 .final-cta-btn:hover {
   background: #ffffff;
   transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
-/* Minimalist Editorial Footer */
+/* Minimalist Editorial 4-Column Footer */
 .landing-footer {
   width: 100%;
-  border-top: 1px solid var(--forest-border);
-  padding-top: 36px;
+  border-top: 1px solid rgba(184, 203, 185, 0.18);
+  padding-top: 40px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 28px;
 }
 
-.footer-top {
+.footer-columns-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1.6fr 1fr 1fr;
+  gap: 36px;
+  align-items: flex-start;
+}
+
+.footer-brand-lockup {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 14px;
 }
 
-.footer-brand {
+.footer-brand-name {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ivory-warm);
+  line-height: 1.1;
+}
+
+.footer-brand-sub {
+  font-size: 11.5px;
+  color: var(--sage-green);
+  line-height: 1.3;
+}
+
+/* Support Column */
+.footer-col-support {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.support-heading-row {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.footer-mark {
-  color: var(--soft-mint);
-}
-
-.footer-title {
-  font-size: 15px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 600;
   color: var(--ivory-warm);
 }
 
-.footer-tagline {
-  font-size: 13px;
-  color: var(--text-on-forest-2);
+.support-icon {
+  font-size: 14px;
 }
 
-.footer-status-pill {
+.support-desc {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-on-forest-2);
+  margin: 0;
+  max-width: 320px;
+}
+
+.footer-support-btn {
+  align-self: flex-start;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(184, 203, 185, 0.28);
+  color: var(--ivory-warm);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 4px;
+}
+
+.footer-support-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--sage-green);
+  color: #ffffff;
+}
+
+/* Nav Columns (Explore & Workspace) */
+.footer-col-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.col-nav-header {
   display: flex;
   align-items: center;
   gap: 8px;
   font-family: var(--font-mono);
-  font-size: 11px;
-  padding: 4px 12px;
-  border-radius: 999px;
-  background: rgba(90, 143, 92, 0.15);
-  color: var(--success);
-  border: 1px solid rgba(90, 143, 92, 0.25);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--ivory-warm);
 }
 
-.status-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--success);
+.col-nav-header svg {
+  color: var(--sage-green);
 }
 
-.footer-bottom {
+.col-nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.col-nav-list li button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--text-on-forest-2);
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.15s ease;
+}
+
+.col-nav-list li button:hover {
+  color: var(--ivory-warm);
+}
+
+.footer-divider-sub {
+  height: 1px;
+  background: rgba(184, 203, 185, 0.12);
+  width: 100%;
+}
+
+.footer-bottom-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 12.5px;
+  font-size: 12px;
   color: var(--text-on-forest-3);
+  padding-bottom: 8px;
 }
 
-.footer-links {
+.footer-copy {
+  margin: 0;
+}
+
+.footer-meta-pill {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.meta-bullet {
+  opacity: 0.5;
 }
 
 /* --------------------------------------------------------------------------
@@ -5876,9 +6020,21 @@
 
   .methodology-bg-image,
   .capabilities-bg-image,
-  .experience-bg-image {
-    background-position: center top;
+  .experience-bg-image,
+  .final-cta-bg-image {
+    background-position: center bottom;
     filter: blur(1px) contrast(1.02);
+  }
+
+  .footer-columns-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+
+  .footer-bottom-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
   }
 
   .hero-bg-photo {
