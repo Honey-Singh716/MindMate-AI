@@ -245,3 +245,4 @@ test("AgentTracer records span timing and metadata", async () => {
     assert.equal(summary.spans[0].status, "ok");
     assert.ok(summary.spans[0].durationMs >= 15);
 });
+
