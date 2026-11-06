@@ -101,66 +101,11 @@ export default function HeroSection({ onStartLearning, onExploreProduct }) {
           </div>
         </div>
 
-        {/* Right Column: Visually Connected Document Intelligence Unit */}
+        {/* Right Column: Neural Engine Active Status */}
         <div className="hero-visual-column">
           <div className="hero-product-composition">
-            {/* 1. Connected Document Intelligence Experience Unit */}
-            <div className="doc-intelligence-unit animate-fade-in">
-              {/* PDF Document Reader Card */}
-              <div className="study-doc-window">
-                <div className="doc-window-header">
-                  <div className="doc-window-pills">
-                    <span className="pdf-type-badge">PDF</span>
-                    <span className="doc-name">Distributed_Systems · Lecture_04.pdf</span>
-                  </div>
-                  <span className="doc-page-counter">Page 14 of 42</span>
-                </div>
-
-                <div className="doc-window-content">
-                  <div className="academic-passage">
-                    <p className="passage-text">
-                      "In the Raft consensus algorithm, safety is maintained by enforcing that the leader’s log is{' '}
-                      <mark className="academic-highlight">always authoritative</mark> and complete across majorities.
-                      A candidate must receive votes from a strict quorum before assuming authority."
-                    </p>
-                  </div>
-
-                  <div className="artifact-concepts">
-                    <span className="concept-pill">✦ Quorum Majority</span>
-                    <span className="concept-pill">✦ Log Replication</span>
-                    <span className="concept-pill">✦ Leader Election</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Visual Connector Stem */}
-              <div className="doc-ai-bridge">
-                <span className="bridge-stem"></span>
-                <div className="bridge-tag">
-                  <span className="bridge-dot"></span>
-                  <span>Grounded AI Synthesis · Citing p. 14</span>
-                </div>
-              </div>
-
-              {/* Contextual AI Explanation Card (Directly Connected) */}
-              <div className="ai-explanation-card animate-fade-up">
-                <div className="ai-explanation-head">
-                  <div className="ai-explanation-title-group">
-                    <span className="explanation-spark">✦</span>
-                    <span className="explanation-title">Contextual Explanation</span>
-                  </div>
-                  <span className="explanation-cite-tag">Match 0.92</span>
-                </div>
-                <p className="explanation-body">
-                  Raft guarantees safety by electing only candidates holding all committed entries.
-                  Because any majority quorum overlaps with the quorum that committed the prior entry,
-                  uncommitted entries can never overwrite established state.
-                </p>
-              </div>
-            </div>
-
-            {/* 2. Neural Engine Active Status Indicator */}
-            <div className="hero-synaptic-card">
+            {/* Neural Engine Active Status Indicator */}
+            <div className="hero-synaptic-card animate-fade-up">
               <div className="synaptic-card-header">
                 <span className="pulse-dot-academic"></span>
                 <span className="synaptic-card-label">NEURAL ENGINE ACTIVE</span>

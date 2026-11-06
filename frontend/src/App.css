@@ -503,12 +503,13 @@
   position: relative;
   display: flex;
   justify-content: flex-end;
+  align-items: flex-end;
 }
 
 .hero-product-composition {
   position: relative;
   width: 100%;
-  max-width: 480px;
+  max-width: 440px;
   display: flex;
   flex-direction: column;
   gap: clamp(10px, 1.4vh, 14px);
