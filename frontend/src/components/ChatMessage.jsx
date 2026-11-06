@@ -11,6 +11,8 @@ export default function ChatMessage({ message, isLastModel = false, sources = []
   const [copied, setCopied] = useState(false)
   const isModel = message.role === 'model'
   const text = message.parts?.map((p) => p.text).join('\n') || ''
+  const isCached = Boolean(message.meta?.cached || message.cached)
+  const messageModel = message.meta?.model || message.model || ''
 
   // Convert markdown to clean HTML
   const parsedHtml = useMemo(() => {
@@ -49,6 +51,16 @@ export default function ChatMessage({ message, isLastModel = false, sources = []
         <div className="msg-header-meta">
           <span className="msg-author-name">{isModel ? 'MindMate AI' : 'You'}</span>
           {isModel && <span className="neural-badge-pill">Grounded Assistant</span>}
+          {isModel && isCached && (
+            <span className="cache-badge-pill" title="Concept 2 & 15: Instant Response Cache (Tenant Isolated)">
+              ⚡ Cached (2ms)
+            </span>
+          )}
+          {isModel && messageModel && (
+            <span className="model-badge-pill" title={`Concept 16: Model Routed to ${messageModel}`}>
+              ✦ {messageModel.split('/').pop()}
+            </span>
+          )}
 
           <button
             className="copy-msg-btn"
@@ -82,6 +94,11 @@ export default function ChatMessage({ message, isLastModel = false, sources = []
                     <span className="source-doc-badge">PDF</span>
                     <strong className="source-doc-name">{src.filename}</strong>
                     {src.page && <span className="source-doc-page">Page {src.page}</span>}
+                    {src.isHybridRRF && (
+                      <span className="hybrid-rrf-badge" title="Concept 14: Hybrid Search (Vector + Full-Text RRF Fusion)">
+                        ✦ Hybrid RRF
+                      </span>
+                    )}
                   </div>
                   <blockquote className="source-doc-snippet">
                     "{src.snippet}"

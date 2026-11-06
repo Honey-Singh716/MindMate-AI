@@ -1251,13 +1251,28 @@ async function handleApi(request, response, store) {
             const cached = globalResponseCache.get(user.sub, message, modelId);
             if (cached) {
                 conversation.history.push({ role: "user", parts: [{ text: message }] });
-                conversation.history.push({ role: "model", parts: [{ text: cached.answer }] });
+                conversation.history.push({
+                    role: "model",
+                    parts: [{ text: cached.answer }],
+                    meta: { model: modelId, cached: true },
+                });
                 if (conversation.title === "New conversation") conversation.title = message.slice(0, 42);
                 conversation.updatedAt = new Date().toISOString();
                 await saveConversation(user, conversation, store);
                 chatSpan.end(null, { cached: true, answerLength: cached.answer.length });
                 logEvent("chat_cache_hit", { userId: user.sub, model: modelId });
-                sendJson(response, 200, { answer: cached.answer, isMock: false, cached: true, conversation, sources: [] });
+                sendJson(response, 200, {
+                    answer: cached.answer,
+                    isMock: false,
+                    cached: true,
+                    model: modelId,
+                    conversation,
+                    sources: [],
+                    tokenBudget: {
+                        used: promptTokens,
+                        warning: false,
+                    },
+                });
                 return;
             }
         }
@@ -1292,14 +1307,25 @@ async function handleApi(request, response, store) {
             }
             ragContext = rag.buildRagContext(retrieved);
             for (const r of retrieved) {
-                sources.push({ documentId: r.documentId, filename: r.filename, page: r.page, snippet: r.content.slice(0, 200) });
+                sources.push({
+                    documentId: r.documentId,
+                    filename: r.filename,
+                    page: r.page,
+                    snippet: r.content.slice(0, 200),
+                    isHybridRRF: Boolean(r.rrfScore),
+                    rrfScore: r.rrfScore ? Number(r.rrfScore.toFixed(4)) : null,
+                });
             }
         }
 
         conversation.history.push({ role: "user", parts: [{ text: message }] });
         try {
             const answer = MOCK_MODE ? mockChat(message) : await chatWithAI(conversation, modelId, ragContext);
-            conversation.history.push({ role: "model", parts: [{ text: answer }] });
+            conversation.history.push({
+                role: "model",
+                parts: [{ text: answer }],
+                meta: { model: modelId, cached: false },
+            });
             if (conversation.title === "New conversation") {
                 conversation.title = message.slice(0, 42);
             }
@@ -1331,7 +1357,18 @@ async function handleApi(request, response, store) {
             chatSpan.end(null, { answerLength: answer.length, model: modelId, sourcesCount: sources.length });
             logEvent("chat_turn_completed", { ...tracer.getSummary(), userId: user.sub, model: modelId });
 
-            sendJson(response, 200, { answer, isMock: MOCK_MODE, conversation, sources });
+            sendJson(response, 200, {
+                answer,
+                isMock: MOCK_MODE,
+                cached: false,
+                model: modelId,
+                conversation,
+                sources,
+                tokenBudget: {
+                    used: totalTurnTokens,
+                    warning: budgetCheck.warning,
+                },
+            });
         } catch (error) {
             conversation.history.pop();
             chatSpan.end(error);

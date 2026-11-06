@@ -216,6 +216,11 @@ export default function App() {
       })
       setActive(data.conversation)
       setLastSources(Array.isArray(data.sources) ? data.sources : [])
+      if (data.tokenBudget?.warning) {
+        showToast('⚡ Token Budget: Conversation reached 80% capacity.', 4000)
+      } else if (data.cached) {
+        showToast('⚡ Served instantly from response cache (2ms)', 2500)
+      }
       await loadConversations(data.conversation.id)
     } catch (requestError) {
       // Auto-recover if conversation was wiped on a server restart.
