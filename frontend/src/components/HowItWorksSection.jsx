@@ -58,6 +58,12 @@ export default function HowItWorksSection() {
 
   return (
     <section id="how-it-works" className="how-section">
+      {/* Subtle Academic Study Room Backdrop */}
+      <div className="methodology-bg-backdrop" aria-hidden="true">
+        <div className="methodology-bg-image" />
+        <div className="methodology-bg-overlay" />
+      </div>
+
       <div className="section-container">
         {/* Header */}
         <div className="section-header-block">

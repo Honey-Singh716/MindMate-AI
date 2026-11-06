@@ -1345,15 +1345,70 @@
 }
 
 /* --------------------------------------------------------------------------
-   6. HOW IT WORKS SECTION (4-Step Pipeline - Soft Sage Surface)
+   6. HOW IT WORKS SECTION (4-Step Pipeline - Academic Study Room Surface)
    -------------------------------------------------------------------------- */
 .how-section {
   background: var(--ivory-sage);
   color: var(--text-on-ivory);
   padding: 100px 0;
   position: relative;
+  overflow: hidden;
   border-top: 1px solid var(--ivory-border);
   border-bottom: 1px solid var(--ivory-border);
+}
+
+/* Subtle Academic Study Room Backdrop */
+.methodology-bg-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.methodology-bg-image {
+  position: absolute;
+  inset: 0;
+  background-image: url('/methodology-bg.jpg');
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  opacity: 0.94;
+  filter: contrast(1.02) saturate(1.02);
+  transform: scale(1.01);
+  will-change: transform, opacity;
+}
+
+/* Subtle Warm Ivory Directional Overlay (NO dark overlay):
+   - Left side: light window, pencils & leaves remain clearly visible (0.26-0.30)
+   - Center area for header & four step cards: subtle ivory support (0.58-0.64) for pristine reading contrast
+   - Right side: vintage globe, books & cascading ivy remain clearly visible (0.22-0.26)
+   - Vertical edges: gentle gradient blend into neighboring sections */
+.methodology-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg,
+      rgba(245, 243, 235, 0.40) 0%,
+      rgba(245, 243, 235, 0.12) 12%,
+      rgba(245, 243, 235, 0.12) 85%,
+      rgba(245, 243, 235, 0.60) 100%
+    ),
+    linear-gradient(90deg,
+      rgba(245, 243, 235, 0.28) 0%,
+      rgba(245, 243, 235, 0.58) 25%,
+      rgba(247, 245, 238, 0.64) 50%,
+      rgba(245, 243, 235, 0.56) 75%,
+      rgba(245, 243, 235, 0.22) 100%
+    );
+  pointer-events: none;
+}
+
+.how-section .section-container {
+  position: relative;
+  z-index: 1;
 }
 
 .how-section .section-tag {
@@ -1387,7 +1442,7 @@
 }
 
 .pipeline-step-card {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.96);
   border: 1px solid var(--ivory-border);
   border-radius: var(--radius-lg);
   padding: 24px;
@@ -1396,22 +1451,24 @@
   flex-direction: column;
   gap: 10px;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 16px rgba(16, 45, 37, 0.05);
   cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .pipeline-step-card:hover {
   background: #ffffff;
   border-color: var(--forest-border-mid);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 8px 24px rgba(16, 45, 37, 0.08);
 }
 
 .pipeline-step-card.active {
   background: #ffffff;
   border-color: var(--forest-green);
   border-width: 1.5px;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 8px 24px rgba(23, 76, 60, 0.10);
 }
 
 .step-card-num-row {
@@ -1450,12 +1507,14 @@
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
   gap: 48px;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.96);
   border: 1px solid var(--ivory-border);
   border-radius: var(--radius-xl);
   padding: 48px;
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 10px 32px rgba(16, 45, 37, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
   align-items: center;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .stage-panel-left {
@@ -5758,6 +5817,12 @@
       rgba(247, 245, 238, 0.70) 50%, 
       rgba(245, 243, 235, 0.65) 100%
     );
+  }
+
+  .methodology-bg-image,
+  .capabilities-bg-image {
+    background-position: center top;
+    filter: blur(1px) contrast(1.02);
   }
 
   .hero-bg-photo {
