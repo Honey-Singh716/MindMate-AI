@@ -22,9 +22,9 @@ export default function HeroSection({ onStartLearning, onExploreProduct }) {
         const normX = (e.clientX - rect.left) / rect.width - 0.5
         const normY = (e.clientY - rect.top) / rect.height - 0.5
 
-        // Subtle, restrained photographic parallax
+        // Subtle, restrained photographic parallax without cropping focal elements
         if (bgPhotoRef.current) {
-          bgPhotoRef.current.style.transform = `scale(1.025) translate(${normX * -10}px, ${normY * -8}px)`
+          bgPhotoRef.current.style.transform = `scale(1.008) translate(${normX * -6}px, ${normY * -4}px)`
         }
       })
     }
@@ -32,7 +32,7 @@ export default function HeroSection({ onStartLearning, onExploreProduct }) {
     function handleMouseLeave() {
       if (rafId) cancelAnimationFrame(rafId)
       if (bgPhotoRef.current) {
-        bgPhotoRef.current.style.transform = 'scale(1.02) translate(0px, 0px)'
+        bgPhotoRef.current.style.transform = 'scale(1.008) translate(0px, 0px)'
       }
     }
 
