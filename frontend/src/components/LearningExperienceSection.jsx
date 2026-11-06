@@ -14,7 +14,7 @@ export default function LearningExperienceSection({ onEnterApp }) {
           </div>
           <h2 className="section-title">
             Your Personal<br />
-            <span className="gradient-text-neural">Learning Space.</span>
+            <span className="serif-accent">Learning Space.</span>
           </h2>
           <p className="section-subtitle">
             An intelligent workspace engineered for clarity and flow. Inspect the actual interface you will use every day.

@@ -79,19 +79,22 @@ export default function AIChatView({
   return (
     <div className="neural-chat-workspace">
       {!activeConversation || !hasHistory ? (
-        /* Empty State with Neural Orb & Prompts */
+        /* Empty State with Academic Emblem & Prompts */
         <div className="chat-empty-state animate-fade-in">
-          <div className="empty-neural-core">
-            <div className="core-orb"></div>
-            <div className="core-pulse-ring ring-1"></div>
-            <div className="core-pulse-ring ring-2"></div>
-            <span className="core-symbol">✦</span>
+          <div className="academic-emblem-wrap">
+            <span className="academic-logo-badge large">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor" />
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="currentColor" fill="rgba(23, 76, 60, 0.08)" />
+                <circle cx="12" cy="10" r="1.5" fill="currentColor" />
+              </svg>
+            </span>
           </div>
 
-          <span className="empty-eyebrow">NEURAL LEARNING COMPANION</span>
-          <h2 className="empty-title">Your ideas start here.</h2>
+          <span className="empty-eyebrow">AI STUDY TUTOR</span>
+          <h2 className="empty-title">Your knowledge, clarified.</h2>
           <p className="empty-subtitle">
-            Ask questions, explore concepts, and turn curiosity into understanding with accelerated AI.
+            Ask questions, explore complex concepts, and examine study materials with grounded explanations.
           </p>
 
           {/* Suggested Prompt Cards */}

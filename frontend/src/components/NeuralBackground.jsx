@@ -1,10 +1,14 @@
 import { useEffect, useRef } from 'react'
 
+/**
+ * MindMate 2.0 — Calm Academic Knowledge Network Background
+ * Subtle, organic constellation of study nodes with thin sage connecting lines,
+ * gentle opacity transitions, and minimal traveling light packets.
+ * Fully respects prefers-reduced-motion.
+ */
 export default function NeuralBackground({
   interactive = true,
   density = 'normal',
-  showBackgroundImage = true,
-  opacity = 0.85,
   className = '',
 }) {
   const canvasRef = useRef(null)
@@ -17,13 +21,16 @@ export default function NeuralBackground({
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
+    // Check for prefers-reduced-motion
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
     let width = 0
     let height = 0
     let dpr = Math.min(window.devicePixelRatio || 1, 2)
 
-    // Config based on density
-    const nodeCount = density === 'dense' ? 48 : density === 'sparse' ? 24 : 36
-    const particleCount = density === 'dense' ? 60 : 38
+    // Academic node count: clean, uncluttered, breathable
+    const nodeCount = density === 'dense' ? 34 : density === 'sparse' ? 18 : 26
+    const particleCount = density === 'dense' ? 24 : 16
 
     let nodes = []
     let particles = []
@@ -42,6 +49,9 @@ export default function NeuralBackground({
       ctx.scale(dpr, dpr)
 
       initNodes()
+      if (prefersReducedMotion) {
+        drawStaticFrame()
+      }
     }
 
     function initNodes() {
@@ -49,38 +59,42 @@ export default function NeuralBackground({
       particles = []
       pulses = []
 
-      // Generate biological neural nodes
+      // Generate calm study knowledge nodes clustered naturally on the right
       for (let i = 0; i < nodeCount; i++) {
-        // Bias nodes towards central and upper-right clusters (resembling biological brain cortex)
-        const isCluster = Math.random() > 0.4
-        const clusterCenterX = width * 0.62
-        const clusterCenterY = height * 0.45
-        const spread = Math.min(width, height) * 0.42
+        const isCluster = Math.random() > 0.35
+        const clusterCenterX = width * 0.65
+        const clusterCenterY = height * 0.44
+        const spread = Math.min(width, height) * 0.44
 
         const x = isCluster
-          ? clusterCenterX + (Math.random() - 0.5) * spread * 1.3
+          ? clusterCenterX + (Math.random() - 0.5) * spread * 1.2
           : Math.random() * width
         const y = isCluster
-          ? clusterCenterY + (Math.random() - 0.5) * spread * 1.1
+          ? clusterCenterY + (Math.random() - 0.5) * spread * 1.05
           : Math.random() * height
+
+        // Color palette: Sage Green (#B8CBB9) and Soft Mint (#DDEBE0)
+        const isMint = Math.random() > 0.6
+        const nodeColor = isMint ? '#DDEBE0' : '#B8CBB9'
 
         nodes.push({
           x,
           y,
           baseX: x,
           baseY: y,
-          vx: (Math.random() - 0.5) * 0.35,
-          vy: (Math.random() - 0.5) * 0.35,
-          radius: 2 + Math.random() * 3.5,
-          color: Math.random() > 0.6 ? '#F368E0' : Math.random() > 0.3 ? '#B49AFF' : '#8057E5',
+          // Very gentle, slow academic drift (0.1 - 0.16)
+          vx: (Math.random() - 0.5) * 0.14,
+          vy: (Math.random() - 0.5) * 0.14,
+          radius: 1.6 + Math.random() * 1.8,
+          color: nodeColor,
           pulsePhase: Math.random() * Math.PI * 2,
-          pulseSpeed: 0.02 + Math.random() * 0.03,
+          pulseSpeed: 0.012 + Math.random() * 0.016, // slow breathing
           connections: [],
         })
       }
 
-      // Precalculate connections (axons/dendrites)
-      const maxDistance = Math.min(width, height) * 0.28
+      // Precalculate connecting lines (thin knowledge links)
+      const maxDistance = Math.min(width, height) * 0.26
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
           const dx = nodes[i].x - nodes[j].x
@@ -92,23 +106,21 @@ export default function NeuralBackground({
         }
       }
 
-      // Generate floating microscopic particles
+      // Minimal subtle academic particles (drifting like quiet library dust)
       for (let i = 0; i < particleCount; i++) {
         particles.push({
           x: Math.random() * width,
           y: Math.random() * height,
-          vx: (Math.random() - 0.5) * 0.2,
-          vy: -0.15 - Math.random() * 0.3, // gently drifting upwards
-          size: 0.8 + Math.random() * 2,
-          alpha: 0.2 + Math.random() * 0.6,
-          hue: Math.random() > 0.5 ? 270 : 315, // violet or magenta
+          vx: (Math.random() - 0.5) * 0.08,
+          vy: -0.06 - Math.random() * 0.12,
+          size: 0.8 + Math.random() * 1.2,
+          alpha: 0.12 + Math.random() * 0.22,
         })
       }
     }
 
     function spawnPulse() {
       if (nodes.length < 2) return
-      // Pick a random node that has connections
       const candidates = nodes.filter((n) => n.connections.length > 0)
       if (!candidates.length) return
       const source = candidates[Math.floor(Math.random() * candidates.length)]
@@ -122,16 +134,16 @@ export default function NeuralBackground({
         x2: target.x,
         y2: target.y,
         progress: 0,
-        speed: 0.015 + Math.random() * 0.025,
-        color: Math.random() > 0.5 ? '#F368E0' : '#E0E7FF',
-        size: 2.2 + Math.random() * 1.8,
+        speed: 0.008 + Math.random() * 0.012, // slow, graceful traveling light
+        color: '#DDEBE0',
+        size: 1.8,
       })
     }
 
     let pulseTimer = 0
 
     function handleMouseMove(e) {
-      if (!interactive) return
+      if (!interactive || prefersReducedMotion) return
       const rect = canvas.getBoundingClientRect()
       mousePos.current.targetX = e.clientX - rect.left
       mousePos.current.targetY = e.clientY - rect.top
@@ -150,35 +162,87 @@ export default function NeuralBackground({
 
     resize()
 
+    function drawStaticFrame() {
+      ctx.clearRect(0, 0, width, height)
+
+      // Background ambient gradient: Deep Forest (#102D25) to Forest Green (#174C3C)
+      const bgGrad = ctx.createRadialGradient(
+        width * 0.65,
+        height * 0.44,
+        40,
+        width * 0.65,
+        height * 0.44,
+        Math.max(width, height) * 0.65
+      )
+      bgGrad.addColorStop(0, '#154234')
+      bgGrad.addColorStop(0.5, '#102D25')
+      bgGrad.addColorStop(1, '#0C231D')
+      ctx.fillStyle = bgGrad
+      ctx.fillRect(0, 0, width, height)
+
+      // Draw connections
+      const maxDistance = Math.min(width, height) * 0.26
+      for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i]
+        for (let j = 0; j < node.connections.length; j++) {
+          const target = nodes[node.connections[j]]
+          if (!target) continue
+          const dx = node.x - target.x
+          const dy = node.y - target.y
+          const dist = Math.sqrt(dx * dx + dy * dy)
+          if (dist > maxDistance) continue
+
+          const alpha = (1 - dist / maxDistance) * 0.18
+          ctx.beginPath()
+          ctx.moveTo(node.x, node.y)
+          ctx.lineTo(target.x, target.y)
+          ctx.strokeStyle = `rgba(184, 203, 185, ${alpha})`
+          ctx.lineWidth = 0.8
+          ctx.stroke()
+        }
+      }
+
+      // Draw nodes
+      for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i]
+        ctx.fillStyle = node.color
+        ctx.beginPath()
+        ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2)
+        ctx.fill()
+      }
+    }
+
     // Animation Loop
     function render() {
+      if (prefersReducedMotion) return
+
       ctx.clearRect(0, 0, width, height)
 
       // Smooth mouse interpolation
-      mousePos.current.x += (mousePos.current.targetX - mousePos.current.x) * 0.08
-      mousePos.current.y += (mousePos.current.targetY - mousePos.current.y) * 0.08
+      mousePos.current.x += (mousePos.current.targetX - mousePos.current.x) * 0.05
+      mousePos.current.y += (mousePos.current.targetY - mousePos.current.y) * 0.05
 
-      // Draw background ambient glow
-      const radialGlow = ctx.createRadialGradient(
-        width * 0.65,
-        height * 0.42,
-        20,
-        width * 0.65,
-        height * 0.42,
-        Math.max(width, height) * 0.55
+      // Calm ambient academic depth (Deep Forest with soft emerald/sage ambient pool)
+      const radialDepth = ctx.createRadialGradient(
+        width * 0.64,
+        height * 0.44,
+        30,
+        width * 0.64,
+        height * 0.44,
+        Math.max(width, height) * 0.65
       )
-      radialGlow.addColorStop(0, 'rgba(128, 87, 229, 0.16)')
-      radialGlow.addColorStop(0.35, 'rgba(217, 70, 239, 0.08)')
-      radialGlow.addColorStop(0.7, 'rgba(9, 9, 15, 0.3)')
-      radialGlow.addColorStop(1, 'rgba(5, 5, 10, 0)')
-      ctx.fillStyle = radialGlow
+      radialDepth.addColorStop(0, 'rgba(23, 76, 60, 0.45)')
+      radialDepth.addColorStop(0.45, 'rgba(16, 45, 37, 0.35)')
+      radialDepth.addColorStop(0.85, 'rgba(12, 35, 29, 0.2)')
+      radialDepth.addColorStop(1, 'rgba(10, 28, 23, 0)')
+      ctx.fillStyle = radialDepth
       ctx.fillRect(0, 0, width, height)
 
       // Update & Draw Nodes
       for (let i = 0; i < nodes.length; i++) {
         const node = nodes[i]
 
-        // Organic oscillation around base position
+        // Organic oscillation
         node.baseX += node.vx
         node.baseY += node.vy
         if (node.baseX < 0 || node.baseX > width) node.vx *= -1
@@ -186,15 +250,15 @@ export default function NeuralBackground({
 
         node.pulsePhase += node.pulseSpeed
 
-        // Mouse repulsion / gravitation parallax
+        // Subtle mouse parallax
         let dx = mousePos.current.x - node.baseX
         let dy = mousePos.current.y - node.baseY
         let mouseDist = Math.sqrt(dx * dx + dy * dy)
         let offsetX = 0
         let offsetY = 0
 
-        if (mouseDist < 240) {
-          const factor = (1 - mouseDist / 240) * 22
+        if (mouseDist < 200) {
+          const factor = (1 - mouseDist / 200) * 12
           offsetX = -(dx / mouseDist) * factor
           offsetY = -(dy / mouseDist) * factor
         }
@@ -202,69 +266,51 @@ export default function NeuralBackground({
         node.x = node.baseX + offsetX
         node.y = node.baseY + offsetY
 
-        // Draw connections (axons/dendrites)
+        // Draw thin sage connecting lines
+        const maxDist = Math.min(width, height) * 0.26
         for (let j = 0; j < node.connections.length; j++) {
-          const targetIndex = node.connections[j]
-          const target = nodes[targetIndex]
+          const target = nodes[node.connections[j]]
           if (!target) continue
 
           const cdx = node.x - target.x
           const cdy = node.y - target.y
           const cdist = Math.sqrt(cdx * cdx + cdy * cdy)
-          const maxDist = Math.min(width, height) * 0.28
           if (cdist > maxDist) continue
 
-          const alpha = (1 - cdist / maxDist) * 0.38
-          const gradient = ctx.createLinearGradient(node.x, node.y, target.x, target.y)
-          gradient.addColorStop(0, `rgba(180, 154, 255, ${alpha})`)
-          gradient.addColorStop(0.5, `rgba(243, 104, 224, ${alpha * 0.9})`)
-          gradient.addColorStop(1, `rgba(128, 87, 229, ${alpha * 0.7})`)
-
+          const alpha = (1 - cdist / maxDist) * 0.16
           ctx.beginPath()
-          // Curved organic biological bezier path
-          const midX = (node.x + target.x) / 2 + Math.sin(node.pulsePhase) * 6
-          const midY = (node.y + target.y) / 2 + Math.cos(node.pulsePhase) * 6
           ctx.moveTo(node.x, node.y)
-          ctx.quadraticCurveTo(midX, midY, target.x, target.y)
-          ctx.strokeStyle = gradient
-          ctx.lineWidth = Math.max(0.6, (1 - cdist / maxDist) * 1.8)
+          ctx.lineTo(target.x, target.y)
+          ctx.strokeStyle = `rgba(184, 203, 185, ${alpha})`
+          ctx.lineWidth = Math.max(0.6, (1 - cdist / maxDist) * 1.1)
           ctx.stroke()
         }
 
-        // Draw Synaptic Soma Node
+        // Draw Knowledge Node
         const pulse = Math.sin(node.pulsePhase)
-        const currentRadius = node.radius + pulse * 1.2
+        const currentRadius = node.radius + pulse * 0.4
+        const nodeAlpha = 0.55 + pulse * 0.25
 
-        // Outer glow
-        const glowGradient = ctx.createRadialGradient(
-          node.x,
-          node.y,
-          0,
-          node.x,
-          node.y,
-          currentRadius * 4.5
-        )
-        glowGradient.addColorStop(0, node.color)
-        glowGradient.addColorStop(0.4, 'rgba(180, 154, 255, 0.4)')
-        glowGradient.addColorStop(1, 'rgba(0, 0, 0, 0)')
-
-        ctx.fillStyle = glowGradient
+        // Delicate academic halo
+        ctx.fillStyle = `rgba(184, 203, 185, ${nodeAlpha * 0.2})`
         ctx.beginPath()
-        ctx.arc(node.x, node.y, currentRadius * 4.5, 0, Math.PI * 2)
+        ctx.arc(node.x, node.y, currentRadius * 2.2, 0, Math.PI * 2)
         ctx.fill()
 
-        // Core bright center
-        ctx.fillStyle = '#FFFFFF'
+        // Crisp node core
+        ctx.fillStyle = node.color === '#DDEBE0'
+          ? `rgba(221, 235, 224, ${nodeAlpha})`
+          : `rgba(184, 203, 185, ${nodeAlpha})`
         ctx.beginPath()
-        ctx.arc(node.x, node.y, Math.max(1, currentRadius * 0.5), 0, Math.PI * 2)
+        ctx.arc(node.x, node.y, currentRadius, 0, Math.PI * 2)
         ctx.fill()
       }
 
-      // Spawn and update action potential pulses
+      // Traveling light packets along connections
       pulseTimer++
-      if (pulseTimer > 18) {
+      if (pulseTimer > 45) {
         pulseTimer = 0
-        if (Math.random() > 0.25) spawnPulse()
+        if (Math.random() > 0.4) spawnPulse()
       }
 
       for (let i = pulses.length - 1; i >= 0; i--) {
@@ -277,18 +323,15 @@ export default function NeuralBackground({
 
         const px = p.x1 + (p.x2 - p.x1) * p.progress
         const py = p.y1 + (p.y2 - p.y1) * p.progress
+        const pAlpha = Math.sin(p.progress * Math.PI) * 0.65
 
-        // Pulse energy packet
-        ctx.fillStyle = p.color
-        ctx.shadowColor = p.color
-        ctx.shadowBlur = 10
+        ctx.fillStyle = `rgba(221, 235, 224, ${pAlpha})`
         ctx.beginPath()
         ctx.arc(px, py, p.size, 0, Math.PI * 2)
         ctx.fill()
-        ctx.shadowBlur = 0
       }
 
-      // Floating microscopic dust particles
+      // Minimal floating particles
       for (let i = 0; i < particles.length; i++) {
         const pt = particles[i]
         pt.x += pt.vx
@@ -301,7 +344,7 @@ export default function NeuralBackground({
         if (pt.x < -10) pt.x = width + 10
         if (pt.x > width + 10) pt.x = -10
 
-        ctx.fillStyle = `hsla(${pt.hue}, 80%, 75%, ${pt.alpha * 0.6})`
+        ctx.fillStyle = `rgba(245, 243, 235, ${pt.alpha})`
         ctx.beginPath()
         ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2)
         ctx.fill()
@@ -310,7 +353,9 @@ export default function NeuralBackground({
       animFrameId.current = requestAnimationFrame(render)
     }
 
-    render()
+    if (!prefersReducedMotion) {
+      render()
+    }
 
     return () => {
       window.removeEventListener('resize', resize)
@@ -333,27 +378,21 @@ export default function NeuralBackground({
         overflow: 'hidden',
         pointerEvents: interactive ? 'auto' : 'none',
         zIndex: 0,
+        backgroundColor: '#102D25',
       }}
     >
-      {/* Background atmospheric image blend */}
-      {showBackgroundImage && (
-        <div
-          className="neural-image-layer"
-          style={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage: `radial-gradient(circle at 65% 45%, rgba(128, 87, 229, 0.28), rgba(9, 9, 15, 0.95) 70%), url('/src/assets/neural_hero.jpg')`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            opacity: opacity * 0.42,
-            filter: 'contrast(1.15) brightness(0.85) saturate(1.2)',
-            mixBlendMode: 'screen',
-            transition: 'opacity 0.6s ease',
-          }}
-        />
-      )}
+      {/* Subtle organic paper/canvas texture overlay */}
+      <div
+        className="academic-texture-overlay"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'radial-gradient(ellipse at 70% 35%, rgba(23, 76, 60, 0.42), transparent 70%), linear-gradient(180deg, rgba(16, 45, 37, 0.3) 0%, rgba(16, 45, 37, 0.95) 100%)',
+          pointerEvents: 'none',
+        }}
+      />
 
-      {/* Interactive Neural Canvas */}
+      {/* Calm Knowledge Network Canvas */}
       <canvas
         ref={canvasRef}
         style={{
@@ -365,14 +404,13 @@ export default function NeuralBackground({
         }}
       />
 
-      {/* Vignette Gradient for editorial text contrast */}
+      {/* Gentle vignette to ensure pristine typography readability */}
       <div
-        className="neural-vignette-layer"
+        className="academic-vignette"
         style={{
           position: 'absolute',
           inset: 0,
-          background:
-            'radial-gradient(circle at 50% 50%, transparent 20%, rgba(9, 9, 15, 0.65) 75%, rgba(5, 5, 10, 0.95) 100%)',
+          background: 'linear-gradient(90deg, rgba(16, 45, 37, 0.92) 0%, rgba(16, 45, 37, 0.45) 45%, transparent 75%), linear-gradient(180deg, transparent 65%, rgba(16, 45, 37, 0.98) 100%)',
           pointerEvents: 'none',
         }}
       />

@@ -48,15 +48,18 @@ export default function AppLayout({
       <aside className={`workspace-sidebar ${mobileMenuOpen ? 'mobile-open' : ''}`}>
         {/* Brand Header */}
         <div className="sidebar-brand-row">
-          <div className="sidebar-brand" onClick={onGoToLanding} title="MindMate AI Studio - Back to Landing">
-            <span className="brand-logo-mark">
-              <span className="sparkle">✦</span>
-              <span className="logo-glow"></span>
+          <div className="sidebar-brand" onClick={onGoToLanding} title="MindMate — Return to Landing Page">
+            <span className="academic-logo-badge">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#F5F3EB" />
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#F5F3EB" fill="rgba(245, 243, 235, 0.12)" />
+                <circle cx="12" cy="10" r="1.5" fill="#DDEBE0" />
+              </svg>
             </span>
             {!collapsed && (
               <div className="brand-text-col">
                 <span className="brand-title">MindMate</span>
-                <span className="brand-sub">Neural Intelligence</span>
+                <span className="brand-sub">Academic Companion</span>
               </div>
             )}
           </div>

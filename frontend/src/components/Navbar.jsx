@@ -6,7 +6,7 @@ export default function Navbar({ onOpenAuth, user, onGoToWorkspace }) {
 
   useEffect(() => {
     function handleScroll() {
-      setScrolled(window.scrollY > 30)
+      setScrolled(window.scrollY > 32)
     }
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
@@ -23,57 +23,54 @@ export default function Navbar({ onOpenAuth, user, onGoToWorkspace }) {
   return (
     <header className={`landing-nav ${scrolled ? 'nav-scrolled' : ''}`}>
       <div className="nav-container">
-        {/* Left: Brand + Nav Links */}
-        <div className="nav-left">
-          <a href="#" className="nav-brand" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>
-            <span className="neural-logo-badge">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M12 2L15 8L21 9L16.5 14L18 20L12 17L6 20L7.5 14L3 9L9 8L12 2Z"
-                  fill="url(#brandGrad)"
-                />
-                <circle cx="12" cy="11" r="2.5" fill="#FFFFFF" />
-                <defs>
-                  <linearGradient id="brandGrad" x1="3" y1="2" x2="21" y2="20" gradientUnits="userSpaceOnUse">
-                    <stop stopColor="#F368E0" />
-                    <stop offset="0.5" stopColor="#B49AFF" />
-                    <stop offset="1" stopColor="#8057E5" />
-                  </linearGradient>
-                </defs>
-              </svg>
-            </span>
-            <span className="brand-name">MindMate</span>
-            <span className="brand-version-chip">2.0</span>
-          </a>
+        {/* Brand */}
+        <a
+          href="#"
+          className="nav-brand"
+          onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+        >
+          <span className="nav-brand-mark">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor" />
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="currentColor" fill="rgba(255,255,255,0.08)" />
+              <line x1="12" y1="7" x2="17" y2="7" stroke="currentColor" />
+              <line x1="12" y1="11" x2="17" y2="11" />
+            </svg>
+          </span>
+          <span className="nav-brand-name">MindMate</span>
+          <span className="nav-brand-version">2.0</span>
+        </a>
 
-          <nav className="nav-links desktop-only">
-            <button className="nav-link" onClick={() => scrollToSection('product')}>Product</button>
-            <button className="nav-link" onClick={() => scrollToSection('features')}>Features</button>
-            <button className="nav-link" onClick={() => scrollToSection('how-it-works')}>How It Works</button>
-            <button className="nav-link" onClick={() => scrollToSection('experience')}>Experience</button>
-          </nav>
-        </div>
+        {/* Desktop Nav Links */}
+        <nav className="nav-links desktop-only" aria-label="Main Navigation">
+          <button className="nav-link" onClick={() => scrollToSection('product')}>Capabilities</button>
+          <button className="nav-link" onClick={() => scrollToSection('how-it-works')}>Methodology</button>
+          <button className="nav-link" onClick={() => scrollToSection('experience')}>Study Workspace</button>
+        </nav>
 
-        {/* Right: Auth / Action */}
-        <div className="nav-right">
+        {/* Right Auth Actions */}
+        <div className="nav-actions">
           {user ? (
             <button className="nav-cta-btn" onClick={onGoToWorkspace}>
-              <span>Enter Workspace</span>
-              <span className="btn-glow-dot"></span>
+              Enter Workspace
+              <span className="nav-cta-dot"></span>
             </button>
           ) : (
             <>
               <button className="nav-ghost-btn desktop-only" onClick={() => onOpenAuth('login')}>
-                Log in
+                Sign in
               </button>
               <button className="nav-cta-btn" onClick={() => onOpenAuth('signup')}>
-                <span>Start Learning</span>
-                <span className="btn-arrow">→</span>
+                Start Learning
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
               </button>
             </>
           )}
 
-          {/* Hamburger Menu Toggle */}
+          {/* Mobile Hamburger */}
           <button
             className="mobile-hamburger"
             aria-label="Toggle navigation menu"
@@ -86,14 +83,13 @@ export default function Navbar({ onOpenAuth, user, onGoToWorkspace }) {
         </div>
       </div>
 
-      {/* Mobile Drawer Menu */}
+      {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="mobile-nav-drawer">
+        <div className="mobile-nav-drawer animate-fade-in">
           <div className="drawer-links">
-            <button onClick={() => scrollToSection('product')}>Product</button>
-            <button onClick={() => scrollToSection('features')}>Features</button>
-            <button onClick={() => scrollToSection('how-it-works')}>How It Works</button>
-            <button onClick={() => scrollToSection('experience')}>Experience</button>
+            <button onClick={() => scrollToSection('product')}>Capabilities</button>
+            <button onClick={() => scrollToSection('how-it-works')}>Methodology</button>
+            <button onClick={() => scrollToSection('experience')}>Study Workspace</button>
           </div>
           <div className="drawer-actions">
             {user ? (
@@ -103,10 +99,10 @@ export default function Navbar({ onOpenAuth, user, onGoToWorkspace }) {
             ) : (
               <>
                 <button className="drawer-btn outline" onClick={() => { setMobileMenuOpen(false); onOpenAuth('login'); }}>
-                  Log in
+                  Sign in
                 </button>
                 <button className="drawer-btn primary" onClick={() => { setMobileMenuOpen(false); onOpenAuth('signup'); }}>
-                  Start Learning
+                  Start Learning →
                 </button>
               </>
             )}

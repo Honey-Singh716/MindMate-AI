@@ -1,68 +1,58 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 export default function HowItWorksSection() {
   const [activeStep, setActiveStep] = useState(1)
-  const [autoPlay, setAutoPlay] = useState(true)
 
   const steps = [
     {
       num: '01',
-      title: 'UPLOAD',
+      title: 'Upload Study Material',
       subtitle: 'Document Ingestion',
-      desc: 'The user uploads a study PDF or notes up to 5MB. In-memory validation parses character streams without writing raw files to disk.',
-      detail: 'In-Memory Buffer · Busboy / PDFParse · Strict MIME Validation',
-      graphic: 'pdf',
+      desc: 'Drop in your course textbooks, lecture slides, or seminar papers up to 5 MB. In-memory validation parses text safely without writing raw files to disk.',
+      detail: 'In-Memory Stream Parsing · Strict MIME Validation · Tenant Isolation',
+      preview: {
+        title: 'Distributed_Systems_Ch2.pdf',
+        meta: '28 Pages · 142 Semantic Chunks',
+        highlight: 'Uploaded and partitioned into 600-character overlapping study segments.',
+      },
     },
     {
       num: '02',
-      title: 'UNDERSTAND',
-      subtitle: 'Semantic Chunking',
-      desc: 'MindMate extracts text, cleans formatting artifacts, and divides the document into overlapping semantic chunks with preserved page metadata.',
-      detail: 'Sliding Window · 600 Char Chunks · Page Number Association',
-      graphic: 'chunk',
+      title: 'Neural Understanding',
+      subtitle: 'Vector Semantic Indexing',
+      desc: 'Text is partitioned into clean semantic chunks and transformed into 384-dimensional dense vectors stored in PostgreSQL pgvector for sub-second retrieval.',
+      detail: 'MiniLM-L6-v2 Embeddings · HNSW Vector Index · pgvector Cosine Distance',
+      preview: {
+        title: 'Neural Indexing Matrix',
+        meta: '384 Dimensions · Unit Normalized',
+        highlight: 'Vectors capture conceptual meaning rather than brittle keyword matching.',
+      },
     },
     {
       num: '03',
-      title: 'EMBED',
-      subtitle: 'Neural Vectorization',
-      desc: 'The local Transformers.js all-MiniLM-L6-v2 pipeline converts text chunks into 384-dimensional dense numerical embeddings on CPU or GPU.',
-      detail: 'MiniLM-L6-v2 · 384 Dimensions · Zero Third-party Leakage',
-      graphic: 'embed',
+      title: 'Ask & Explore Concepts',
+      subtitle: 'Grounded Reasoning & Tutor',
+      desc: 'Ask questions in natural language. MindMate retrieves the most relevant passages and conditions Groq AI models to answer with verified page citations.',
+      detail: 'Hybrid RRF Search · Sub-second Groq Inference · Zero Hallucination Guardrails',
+      preview: {
+        title: 'Contextual Query Retrieval',
+        meta: 'Cosine Match: 0.92 · Page 14 Citation',
+        highlight: 'Answers cite exact document names, page numbers, and snippet quotations.',
+      },
     },
     {
       num: '04',
-      title: 'RETRIEVE',
-      subtitle: 'Vector Similarity Search',
-      desc: 'When you ask a question in chat, your query is embedded and matched against chunks using PostgreSQL pgvector cosine similarity (<=>).',
-      detail: 'pgvector Cosine Distance · Top-K Selection · JSONB Fallback',
-      graphic: 'search',
-    },
-    {
-      num: '05',
-      title: 'GENERATE',
-      subtitle: 'Grounded Groq Inference',
-      desc: 'Groq synthesizes an authoritative answer by conditioning the prompt with retrieved passages, avoiding hallucinations.',
-      detail: 'Llama 3.3 70B · Context Grounding · Instant Output Streaming',
-      graphic: 'groq',
-    },
-    {
-      num: '06',
-      title: 'CITE',
-      subtitle: 'Verifiable Citations',
-      desc: 'The answer is delivered with exact document names, page citations, and passage snippets so you can verify truth directly.',
-      detail: 'Source Highlights · Page Indexing · Clickable Snippets',
-      graphic: 'cite',
+      title: 'Generate Notes & Revise',
+      subtitle: 'Curriculum & Smart Summaries',
+      desc: 'Transform insights into persistent study plans, concept checklists, and revision cheat-sheets customized to your target exam date and weekly hours.',
+      detail: 'Milestone Progressions · Priority Scheduling · Dynamic Knowledge Retention',
+      preview: {
+        title: 'Structured Revision Curriculum',
+        meta: '4 Milestones · High / Med Priority',
+        highlight: 'Review structured takeaways and test your recall with conceptual exercises.',
+      },
     },
   ]
-
-  // Auto cycle steps every 5 seconds if user is not manually interacting
-  useEffect(() => {
-    if (!autoPlay) return
-    const timer = setInterval(() => {
-      setActiveStep((prev) => (prev % steps.length) + 1)
-    }, 4500)
-    return () => clearInterval(timer)
-  }, [autoPlay, steps.length])
 
   const current = steps[activeStep - 1]
 
@@ -73,219 +63,85 @@ export default function HowItWorksSection() {
         <div className="section-header-block">
           <div className="section-tag">
             <span className="tag-spark">✦</span>
-            <span>RAG ARCHITECTURE</span>
+            <span>METHODOLOGY</span>
           </div>
           <h2 className="section-title">
-            Your Knowledge.<br />
-            <span className="gradient-text-neural">Connected.</span>
+            How Learning Happens<br />
+            <span className="serif-accent">Inside MindMate.</span>
           </h2>
           <p className="section-subtitle">
-            Experience our 6-stage Retrieval-Augmented Generation pipeline.
-            See how your lecture slides, notes, and research papers are transformed into living neural knowledge.
+            A clear, four-step educational methodology that takes you from raw documents to deep conceptual mastery.
           </p>
         </div>
 
-        {/* 6 Step Progress Pipeline */}
-        <div className="pipeline-timeline">
-          <div className="pipeline-line">
-            <div
-              className="pipeline-line-fill"
-              style={{ width: `${((activeStep - 1) / (steps.length - 1)) * 100}%` }}
-            ></div>
-          </div>
-
-          <div className="pipeline-steps-grid">
-            {steps.map((s, idx) => {
-              const stepNumber = idx + 1
-              const isPast = stepNumber < activeStep
-              const isCurrent = stepNumber === activeStep
-
-              return (
-                <button
-                  key={s.num}
-                  className={`pipeline-node-btn ${isCurrent ? 'active' : ''} ${isPast ? 'past' : ''}`}
-                  onClick={() => {
-                    setAutoPlay(false)
-                    setActiveStep(stepNumber)
-                  }}
-                >
-                  <div className="node-circle">
-                    <span className="node-num">{s.num}</span>
-                    {isCurrent && <span className="node-glow-ring"></span>}
-                  </div>
-                  <span className="node-label">{s.title}</span>
-                </button>
-              )
-            })}
-          </div>
+        {/* 4 Step Pipeline Grid */}
+        <div className="pipeline-four-steps">
+          {steps.map((step, idx) => {
+            const stepNum = idx + 1
+            const isActive = stepNum === activeStep
+            return (
+              <button
+                key={step.num}
+                className={`pipeline-step-card ${isActive ? 'active' : ''}`}
+                onClick={() => setActiveStep(stepNum)}
+              >
+                <div className="step-card-num-row">
+                  <span className="step-card-num">{step.num}</span>
+                  {isActive && <span className="step-active-dot"></span>}
+                </div>
+                <h3 className="step-card-title">{step.title}</h3>
+                <span className="step-card-sub">{step.subtitle}</span>
+              </button>
+            )
+          })}
         </div>
 
-        {/* Interactive Step Display */}
-        <div className="pipeline-stage-card">
-          <div className="pipeline-stage-left">
+        {/* Active Step Detailed Stage */}
+        <div className="pipeline-stage-panel animate-fade-in" key={current.num}>
+          <div className="stage-panel-left">
             <div className="stage-step-tag">
-              <span className="step-badge">STEP {current.num} OF 06</span>
+              <span className="step-badge">STAGE {current.num} OF 04</span>
               <span className="step-subtitle">{current.subtitle}</span>
             </div>
-            <h3 className="pipeline-title">{current.title}</h3>
-            <p className="pipeline-desc">{current.desc}</p>
-            <div className="pipeline-tech-detail">
-              <span className="tech-label">TECHNICAL SPECIFICATION</span>
-              <code className="tech-code">{current.detail}</code>
+            <h3 className="stage-panel-title">{current.title}</h3>
+            <p className="stage-panel-desc">{current.desc}</p>
+            <div className="stage-spec-box">
+              <span className="spec-label">ACADEMIC & TECHNICAL SPECIFICATION</span>
+              <code className="spec-code">{current.detail}</code>
             </div>
 
-            <div className="pipeline-controls">
+            <div className="stage-nav-controls">
               <button
-                className="pipeline-prev-btn"
+                className="stage-nav-btn"
                 disabled={activeStep === 1}
-                onClick={() => {
-                  setAutoPlay(false)
-                  setActiveStep((p) => Math.max(1, p - 1))
-                }}
+                onClick={() => setActiveStep((p) => Math.max(1, p - 1))}
               >
-                ← Previous
+                ← Previous Stage
               </button>
               <button
-                className="pipeline-next-btn"
+                className="stage-nav-btn next-btn"
                 disabled={activeStep === steps.length}
-                onClick={() => {
-                  setAutoPlay(false)
-                  setActiveStep((p) => Math.min(steps.length, p + 1))
-                }}
+                onClick={() => setActiveStep((p) => Math.min(steps.length, p + 1))}
               >
                 Next Stage →
               </button>
-              <button
-                className={`pipeline-play-btn ${autoPlay ? 'active' : ''}`}
-                onClick={() => setAutoPlay(!autoPlay)}
-                title={autoPlay ? 'Pause auto-cycle' : 'Resume auto-cycle'}
-              >
-                {autoPlay ? '⏸ Pause' : '▶ Auto-play'}
-              </button>
             </div>
           </div>
 
-          {/* Interactive animated diagram for this step */}
-          <div className="pipeline-stage-right">
-            <div className="pipeline-diagram-box">
-              {current.graphic === 'pdf' && (
-                <div className="diagram-pdf-stage animate-fade-in">
-                  <div className="upload-dropzone-mock">
-                    <div className="pdf-sheet">
-                      <div className="sheet-corner"></div>
-                      <span className="pdf-chip">PDF</span>
-                      <div className="sheet-lines">
-                        <span></span><span></span><span></span><span></span>
-                      </div>
-                    </div>
-                    <div className="upload-arrow-particle">
-                      <span className="arrow-beam"></span>
-                      <span>Indexing buffer</span>
-                    </div>
-                  </div>
+          <div className="stage-panel-right">
+            <div className="stage-preview-artifact">
+              <div className="preview-top-bar">
+                <span className="preview-sparkle">✦</span>
+                <span className="preview-artifact-title">{current.preview.title}</span>
+                <span className="preview-status-pill">{current.preview.meta}</span>
+              </div>
+              <div className="preview-artifact-content">
+                <p className="preview-body-text">{current.preview.highlight}</p>
+                <div className="preview-meta-row">
+                  <span className="preview-meta-tag">Verified Grounding</span>
+                  <span className="preview-meta-tag">100% Private</span>
                 </div>
-              )}
-
-              {current.graphic === 'chunk' && (
-                <div className="diagram-chunk-stage animate-fade-in">
-                  <div className="chunks-grid">
-                    <div className="chunk-slice slice-1">
-                      <span className="slice-tag">Chunk #1 · Page 1</span>
-                      <div className="slice-txt">"Transformers rely on multi-head self-attention..."</div>
-                    </div>
-                    <div className="chunk-slice slice-2">
-                      <span className="slice-tag">Chunk #2 · Page 1-2</span>
-                      <div className="slice-txt">"Each head projects queries, keys, and values..."</div>
-                    </div>
-                    <div className="chunk-slice slice-3">
-                      <span className="slice-tag">Chunk #3 · Page 2</span>
-                      <div className="slice-txt">"Scaled dot-product prevents vanishing gradients..."</div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {current.graphic === 'embed' && (
-                <div className="diagram-embed-stage animate-fade-in">
-                  <div className="vector-cube-mock">
-                    <div className="vector-matrix">
-                      <span className="mat-head">all-MiniLM-L6-v2 Embeddings (384-float array)</span>
-                      <div className="mat-values">
-                        <span>[+0.0482,</span>
-                        <span>-0.1294,</span>
-                        <span>+0.8841,</span>
-                        <span>+0.0120,</span>
-                        <span>-0.3459,</span>
-                        <span>+0.2198,</span>
-                        <span>... 378 more floats]</span>
-                      </div>
-                    </div>
-                    <div className="vector-sparks">
-                      <div className="spark-node s1"></div>
-                      <div className="spark-node s2"></div>
-                      <div className="spark-node s3"></div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {current.graphic === 'search' && (
-                <div className="diagram-search-stage animate-fade-in">
-                  <div className="search-cone-vis">
-                    <div className="query-orb">
-                      <span>Query Vector</span>
-                    </div>
-                    <div className="similarity-rays">
-                      <div className="ray r1">
-                        <span className="ray-match">Match 96%</span>
-                        <div className="target-dot"></div>
-                      </div>
-                      <div className="ray r2">
-                        <span className="ray-match">Match 89%</span>
-                        <div className="target-dot"></div>
-                      </div>
-                      <div className="ray r3">
-                        <span className="ray-match">Match 82%</span>
-                        <div className="target-dot"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {current.graphic === 'groq' && (
-                <div className="diagram-groq-stage animate-fade-in">
-                  <div className="groq-infer-chip">
-                    <div className="chip-light"></div>
-                    <span className="groq-brand">Groq LPUs™</span>
-                    <span className="groq-speed">380 Tokens/sec</span>
-                    <div className="stream-tokens">
-                      <span>Conditioning</span>
-                      <span>Retrieved</span>
-                      <span>Chunks</span>
-                      <span>Grounded</span>
-                      <span>Synthesizing</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {current.graphic === 'cite' && (
-                <div className="diagram-cite-stage animate-fade-in">
-                  <div className="citation-final-card">
-                    <div className="cite-badge-verified">
-                      <span>✓</span> Grounded Answer Verified
-                    </div>
-                    <p className="cite-text">
-                      "Attention is calculated using Q, K, and V matrices scaled by √d_k..."
-                    </p>
-                    <div className="cite-pill">
-                      <span>Lecture_Transformers.pdf</span>
-                      <span className="page-tag">Page 4</span>
-                    </div>
-                  </div>
-                </div>
-              )}
+              </div>
             </div>
           </div>
         </div>

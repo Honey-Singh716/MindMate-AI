@@ -1,60 +1,107 @@
 :root {
-  --bg-void: #05050A;
-  --bg-primary: #09090F;
-  --bg-sidebar: #11111A;
-  --bg-surface: #161620;
-  --bg-elevated: #1C1B28;
-  --bg-glass: rgba(22, 22, 32, 0.72);
-  --bg-glass-heavy: rgba(17, 17, 26, 0.88);
-  --bg-glass-input: rgba(14, 14, 22, 0.85);
+  /* =========================================================
+     MindMate 2.0 — Academic Design System Tokens
+     ========================================================= */
 
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-medium: rgba(255, 255, 255, 0.14);
-  --border-focus: rgba(180, 154, 255, 0.5);
-  --border-glow: rgba(128, 87, 229, 0.4);
+  /* Forest palette — primary brand identity */
+  --forest-green:      #174C3C;
+  --forest-deep:       #102D25;
+  --forest-midnight:   #0C211B;
+  --forest-surface:    #1A3D30;
+  --forest-elevated:   #1F4D3E;
+  --forest-border:     rgba(184, 203, 185, 0.18);
+  --forest-border-mid: rgba(184, 203, 185, 0.32);
 
-  --primary: #8057E5;
-  --primary-hover: #926bf3;
-  --primary-active: #7146d9;
-  --primary-glow: rgba(128, 87, 229, 0.35);
+  /* Ivory palette — light surfaces */
+  --ivory-warm:        #F5F3EB;
+  --ivory-off:         #FAF9F5;
+  --ivory-sage:        #E6EDE3;
+  --ivory-border:      #D4D9CD;
 
-  --accent: #B49AFF;
-  --accent-pink: #F368E0;
-  --accent-magenta: #D946EF;
-  --accent-violet: #A855F7;
-  --accent-cyan: #38BDF8;
+  /* Accent palette */
+  --sage-green:        #B8CBB9;
+  --soft-mint:         #DDEBE0;
+  --muted-gold:        #B99A63;
+  --muted-gold-bg:     rgba(185, 154, 99, 0.12);
 
-  --text-primary: #F5F3FA;
-  --text-secondary: #9995AB;
-  --text-muted: #6B677F;
-  
-  --danger: #FF6B81;
-  --danger-bg: rgba(255, 107, 129, 0.12);
-  --danger-border: rgba(255, 107, 129, 0.28);
-  --warning: #F59E0B;
-  --warning-bg: rgba(245, 158, 11, 0.12);
-  --warning-border: rgba(245, 158, 11, 0.28);
-  --success: #10B981;
-  --success-bg: rgba(16, 185, 129, 0.12);
+  /* Text — dark section (on forest) */
+  --text-on-forest:    #F5F3EB;
+  --text-on-forest-2:  #B8CBB9;
+  --text-on-forest-3:  #737B73;
 
-  --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  /* Text — light section (on ivory) */
+  --text-on-ivory:     #202923;
+  --text-on-ivory-2:   #4A5248;
+  --text-on-ivory-3:   #737B73;
 
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.55);
-  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.7);
-  --shadow-glow: 0 0 32px rgba(128, 87, 229, 0.25);
-  --shadow-glow-pink: 0 0 32px rgba(243, 104, 224, 0.22);
+  /* Semantic */
+  --danger:            #C0514A;
+  --danger-bg:         rgba(192, 81, 74, 0.1);
+  --danger-border:     rgba(192, 81, 74, 0.25);
+  --success:           #5A8F5C;
+  --success-bg:        rgba(90, 143, 92, 0.1);
+  --warning:           #B99A63;
+  --warning-bg:        rgba(185, 154, 99, 0.1);
+
+  /* Legacy compatibility aliases used by workspace CSS */
+  --bg-primary:        var(--forest-deep);
+  --bg-surface:        var(--forest-surface);
+  --bg-elevated:       var(--forest-elevated);
+  --bg-sidebar:        var(--forest-midnight);
+  --bg-glass:          rgba(16, 45, 37, 0.88);
+  --bg-glass-heavy:    rgba(12, 33, 27, 0.96);
+  --bg-glass-input:    rgba(12, 33, 27, 0.92);
+
+  --primary:           var(--ivory-warm);
+  --primary-hover:     #ffffff;
+  --primary-active:    var(--ivory-sage);
+
+  --accent:            var(--sage-green);
+  --accent-mint:       var(--soft-mint);
+  --accent-soft:       rgba(184, 203, 185, 0.15);
+
+  --text-primary:      var(--text-on-forest);
+  --text-secondary:    var(--text-on-forest-2);
+  --text-muted:        var(--text-on-forest-3);
+  --text-dark:         var(--text-on-ivory);
+
+  --border-subtle:     var(--forest-border);
+  --border-medium:     var(--forest-border-mid);
+  --border-academic:   var(--ivory-border);
+  --border-focus:      rgba(184, 203, 185, 0.6);
+
+  /* Typography */
+  --font-serif:    'DM Serif Display', Georgia, 'Times New Roman', serif;
+  --font-display:  'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body:     'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono:     'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+
+  /* Shadows */
+  --shadow-sm:     0 1px 4px rgba(8, 20, 16, 0.3);
+  --shadow-md:     0 4px 16px rgba(8, 20, 16, 0.4);
+  --shadow-lg:     0 12px 36px rgba(8, 20, 16, 0.5);
+  --shadow-ivory:  0 4px 20px rgba(0, 0, 0, 0.08);
+  --shadow-card:   0 2px 12px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+
+  /* Spacing rhythm */
+  --space-section: 96px;
+  --space-block:   56px;
+  --space-gap:     32px;
+  --radius-sm:     6px;
+  --radius-md:     12px;
+  --radius-lg:     20px;
+  --radius-xl:     28px;
 }
 
+/* =========================================================
+   Base Reset
+   ========================================================= */
 *, *::before, *::after {
   box-sizing: border-box;
 }
 
 html {
   scroll-behavior: smooth;
-  color-scheme: dark;
 }
 
 html, body, #root {
@@ -65,29 +112,27 @@ html, body, #root {
 }
 
 body {
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
+  background-color: var(--forest-deep);
+  color: var(--text-on-forest);
   font-family: var(--font-body);
   font-size: 15px;
-  line-height: 1.6;
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
-  selection-background-color: var(--primary);
-  selection-color: #ffffff;
 }
 
 ::selection {
-  background: rgba(128, 87, 229, 0.45);
-  color: #FFFFFF;
+  background: rgba(184, 203, 185, 0.3);
+  color: #F5F3EB;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
   font-weight: 700;
-  color: var(--text-primary);
+  color: inherit;
   margin: 0;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.02em;
 }
 
 p {
@@ -113,107 +158,72 @@ button {
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
-  outline: 2px solid var(--accent);
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--sage-green);
   outline-offset: 2px;
 }
 
-/* Custom Scrollbars */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
+/* Scrollbars */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(184, 203, 185, 0.2);
   border-radius: 999px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(180, 154, 255, 0.35);
+  background: rgba(184, 203, 185, 0.4);
 }
 
-/* Keyframe animations */
-@keyframes neuralPulse {
-  0%, 100% {
-    opacity: 0.4;
-    transform: scale(0.98);
-  }
-  50% {
-    opacity: 0.9;
-    transform: scale(1.02);
-  }
+/* =========================================================
+   Core Keyframes
+   ========================================================= */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes synapseFlashes {
-  0%, 100% {
-    opacity: 0.2;
-    filter: drop-shadow(0 0 2px rgba(180, 154, 255, 0.2));
-  }
-  50% {
-    opacity: 1;
-    filter: drop-shadow(0 0 16px rgba(243, 104, 224, 0.8));
-  }
-}
-
-@keyframes particleDrift {
-  0% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-18px) rotate(180deg);
-  }
-  100% {
-    transform: translateY(0px) rotate(360deg);
-  }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes floatGentle {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
-}
-
-@keyframes gradientShift {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-6px); }
 }
 
 @keyframes orbBreathe {
-  0%, 100% {
-    transform: scale(1) translate(-50%, -50%);
-    opacity: 0.6;
-  }
-  50% {
-    transform: scale(1.15) translate(-45%, -52%);
-    opacity: 0.95;
-  }
+  0%, 100% { opacity: 0.5; transform: scale(1) translate(-50%, -50%); }
+  50%       { opacity: 0.75; transform: scale(1.08) translate(-47%, -48%); }
 }
 
 @keyframes spinSlow {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
 
-/* Reduced Motion */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.85); }
+}
+
+@keyframes particleDrift {
+  0%   { transform: translateY(0px) rotate(0deg); }
+  50%  { transform: translateY(-14px) rotate(180deg); }
+  100% { transform: translateY(0px) rotate(360deg); }
+}
+
+/* =========================================================
+   Reduced Motion
+   ========================================================= */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

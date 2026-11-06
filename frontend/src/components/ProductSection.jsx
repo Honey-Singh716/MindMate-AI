@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 export default function ProductSection({ onSelectFeature }) {
-  const [activeTab, setActiveTab] = useState('chat')
+  const [activeTab, setActiveTab] = useState('doc-intel')
 
   return (
     <section id="product" className="product-section">
@@ -13,112 +13,98 @@ export default function ProductSection({ onSelectFeature }) {
             <span>CAPABILITIES</span>
           </div>
           <h2 className="section-title">
-            An Intelligence That<br />
-            <span className="gradient-text-neural">Understands How You Learn.</span>
+            An Academic Companion<br />
+            <span className="serif-accent">Designed for Real Study.</span>
           </h2>
           <p className="section-subtitle">
-            Engineered with deep neural architecture, MindMate combines sub-second Groq inference,
-            vector semantic search, and personalized pedagogical synthesis into a unified studio.
+            MindMate unifies document-grounded retrieval, contextual AI tutoring, and curriculum synthesis
+            into an organized, distraction-free academic workspace.
           </p>
         </div>
 
-        {/* Feature Nav Tabs */}
+        {/* 4 Feature Nav Tabs matching User Specification */}
         <div className="capability-tabs">
           <button
-            className={`cap-tab ${activeTab === 'chat' ? 'active' : ''}`}
-            onClick={() => setActiveTab('chat')}
+            className={`cap-tab ${activeTab === 'doc-intel' ? 'active' : ''}`}
+            onClick={() => setActiveTab('doc-intel')}
           >
-            <span className="tab-icon">◈</span>
-            <span className="tab-title">AI Chat</span>
-          </button>
-          <button
-            className={`cap-tab ${activeTab === 'rag' ? 'active' : ''}`}
-            onClick={() => setActiveTab('rag')}
-          >
-            <span className="tab-icon">▤</span>
+            <span className="tab-number">01</span>
             <span className="tab-title">Document Intelligence</span>
           </button>
           <button
-            className={`cap-tab ${activeTab === 'planner' ? 'active' : ''}`}
-            onClick={() => setActiveTab('planner')}
+            className={`cap-tab ${activeTab === 'tutor' ? 'active' : ''}`}
+            onClick={() => setActiveTab('tutor')}
           >
-            <span className="tab-icon">▦</span>
-            <span className="tab-title">Smart Study Planner</span>
+            <span className="tab-number">02</span>
+            <span className="tab-title">AI Study Tutor</span>
           </button>
           <button
-            className={`cap-tab ${activeTab === 'models' ? 'active' : ''}`}
-            onClick={() => setActiveTab('models')}
+            className={`cap-tab ${activeTab === 'concept' ? 'active' : ''}`}
+            onClick={() => setActiveTab('concept')}
           >
-            <span className="tab-icon">⟐</span>
-            <span className="tab-title">Model Intelligence</span>
+            <span className="tab-number">03</span>
+            <span className="tab-title">Concept Explorer</span>
+          </button>
+          <button
+            className={`cap-tab ${activeTab === 'notes' ? 'active' : ''}`}
+            onClick={() => setActiveTab('notes')}
+          >
+            <span className="tab-number">04</span>
+            <span className="tab-title">Smart Notes</span>
           </button>
         </div>
 
         {/* Interactive Showcase Stage */}
         <div className="capability-stage">
-          {activeTab === 'chat' && (
-            <div className="stage-card stage-chat animate-fade-in">
+          {/* 01 - Document Intelligence */}
+          {activeTab === 'doc-intel' && (
+            <div className="stage-card stage-doc animate-fade-in">
               <div className="stage-left">
-                <span className="stage-badge">01 · CONVERSATIONAL ENGINE</span>
-                <h3 className="stage-title">AI Chat</h3>
+                <span className="stage-badge">01 · KNOWLEDGE BASE</span>
+                <h3 className="stage-title">Document Intelligence</h3>
                 <p className="stage-desc">
-                  Explore ideas, ask questions, and understand complex concepts through AI-powered conversations.
-                  Whether breaking down quantum mechanics or debugging asynchronous JavaScript, MindMate adapts
-                  to your learning pace.
+                  Upload textbooks, research papers, and slide decks. MindMate ingests text into private
+                  vector embeddings and grounds answers directly in your study material with exact page citations.
                 </p>
                 <div className="stage-features-list">
                   <div className="feat-chip">
-                    <span className="chip-bullet">✦</span> Sub-second Groq streaming
+                    <span className="chip-bullet">✓</span> In-memory PDF parsing up to 5 MB
                   </div>
                   <div className="feat-chip">
-                    <span className="chip-bullet">✦</span> Syntax-highlighted code output
+                    <span className="chip-bullet">✓</span> 384-dimensional pgvector cosine retrieval
                   </div>
                   <div className="feat-chip">
-                    <span className="chip-bullet">✦</span> Persistent private session threads
+                    <span className="chip-bullet">✓</span> Verified page and passage citations
                   </div>
                 </div>
-                <button className="stage-cta-btn" onClick={() => onSelectFeature?.('chat')}>
-                  Open AI Chat Studio →
+                <button className="stage-cta-btn" onClick={() => onSelectFeature?.('documents')}>
+                  Explore Documents Workspace →
                 </button>
               </div>
 
               <div className="stage-right">
-                <div className="interactive-chat-mock">
-                  <div className="mock-window-header">
-                    <div className="mock-dots">
-                      <span></span><span></span><span></span>
-                    </div>
-                    <span className="mock-title">Session: Neural Network Backprop</span>
-                    <span className="mock-model-pill">llama-3.3-70b-versatile</span>
-                  </div>
-
-                  <div className="mock-messages">
-                    <div className="mock-msg mock-user">
-                      <span className="mock-avatar">U</span>
-                      <div className="mock-bubble">
-                        How does the chain rule apply when computing gradients in a deep neural layer?
+                <div className="doc-intelligence-preview">
+                  <div className="preview-doc-card">
+                    <div className="doc-card-top">
+                      <span className="pdf-label">PDF</span>
+                      <div>
+                        <strong className="doc-card-name">Algorithms_Design_Ch4.pdf</strong>
+                        <span className="doc-card-meta">32 pages · 128 chunks indexed</span>
                       </div>
+                      <span className="badge-grounded">Indexed</span>
                     </div>
 
-                    <div className="mock-msg mock-assistant">
-                      <span className="mock-avatar assistant-mark">✦</span>
-                      <div className="mock-bubble">
-                        <p className="mock-lead">
-                          In backpropagation, the chain rule allows us to compute the gradient of the loss
-                          function with respect to each weight by working backward through the computational graph:
-                        </p>
-                        <div className="mock-code-block">
-                          <code>
-                            {`// Loss gradient with respect to weight W[l]
-dZ[l] = dA[l] ⊙ g'[l](Z[l])
-dW[l] = (1/m) * dZ[l] · A[l-1].T
-db[l] = (1/m) * sum(dZ[l])`}
-                          </code>
-                        </div>
-                        <p className="mock-note">
-                          Each layer receives incoming error gradients from upstream and propagates them to earlier weights.
-                        </p>
-                      </div>
+                    <div className="doc-card-passage">
+                      <span className="passage-tag">CITATION SNIPPET · P. 84</span>
+                      <p className="passage-quote">
+                        "Dynamic programming solves each subproblem once and caches the result in a lookup table,
+                        avoiding exponential redundant recomputation in overlapping subproblems."
+                      </p>
+                    </div>
+
+                    <div className="doc-card-footer">
+                      <span className="match-pill">Cosine similarity: 0.914</span>
+                      <span className="tenant-pill">Tenant Isolated</span>
                     </div>
                   </div>
                 </div>
@@ -126,70 +112,46 @@ db[l] = (1/m) * sum(dZ[l])`}
             </div>
           )}
 
-          {activeTab === 'rag' && (
-            <div className="stage-card stage-rag animate-fade-in">
+          {/* 02 - AI Study Tutor */}
+          {activeTab === 'tutor' && (
+            <div className="stage-card stage-tutor animate-fade-in">
               <div className="stage-left">
-                <span className="stage-badge">02 · GROUNDED RETRIEVAL</span>
-                <h3 className="stage-title">Document Intelligence</h3>
+                <span className="stage-badge">02 · CONTEXTUAL EXPLANATION</span>
+                <h3 className="stage-title">AI Study Tutor</h3>
                 <p className="stage-desc">
-                  Upload your study materials and ask questions grounded in your own documents.
-                  Using Transformers.js all-MiniLM-L6-v2 embeddings and PostgreSQL pgvector, MindMate pinpoints
-                  exact paragraphs with page-level citations.
+                  Ask questions, receive step-by-step conceptual breakdowns, and explore difficult coursework.
+                  Powered by ultra-fast Groq LPU inference, explanations feel natural, fast, and academically rigorous.
                 </p>
-                <div className="stage-highlights-grid">
-                  <div className="highlight-box">
-                    <span className="hl-icon">📄</span>
-                    <strong>PDF Ingestion</strong>
-                    <p>In-memory text parsing up to 5MB with zero disk leakage</p>
+                <div className="stage-features-list">
+                  <div className="feat-chip">
+                    <span className="chip-bullet">✓</span> Sub-second streaming conversational reasoning
                   </div>
-                  <div className="highlight-box">
-                    <span className="hl-icon">⚡</span>
-                    <strong>Semantic Vector Search</strong>
-                    <p>Cosine similarity matching against chunked knowledge bases</p>
+                  <div className="feat-chip">
+                    <span className="chip-bullet">✓</span> Formatted mathematical notation and code
                   </div>
-                  <div className="highlight-box">
-                    <span className="hl-icon">🎯</span>
-                    <strong>Exact Page Citations</strong>
-                    <p>Inspect exact page and passage snippets verifying answers</p>
-                  </div>
-                  <div className="highlight-box">
-                    <span className="hl-icon">🔒</span>
-                    <strong>Private Embeddings</strong>
-                    <p>Scoped strictly to your authenticated workspace user account</p>
+                  <div className="feat-chip">
+                    <span className="chip-bullet">✓</span> Persistent session history and thread isolation
                   </div>
                 </div>
-                <button className="stage-cta-btn" onClick={() => onSelectFeature?.('documents')}>
-                  Manage Documents →
+                <button className="stage-cta-btn" onClick={() => onSelectFeature?.('chat')}>
+                  Launch AI Study Tutor →
                 </button>
               </div>
 
               <div className="stage-right">
-                <div className="rag-visual-mock">
-                  <div className="doc-preview-card">
-                    <div className="doc-icon-badge">PDF</div>
-                    <div className="doc-meta">
-                      <strong>Distributed_Systems_Lecture_4.pdf</strong>
-                      <span>28 pages · 142 chunks · 3.2 MB</span>
-                    </div>
-                    <span className="doc-status-badge">Indexed</span>
+                <div className="tutor-chat-preview">
+                  <div className="tutor-header">
+                    <span className="tutor-dot"></span>
+                    <span className="tutor-title">Session: Computational Complexity</span>
                   </div>
-
-                  {/* Neural connection bridge */}
-                  <div className="neural-bridge-animation">
-                    <div className="bridge-wire"></div>
-                    <div className="bridge-pulse"></div>
-                    <span className="bridge-tag">MiniLM 384-dim vector match (0.892 similarity)</span>
+                  <div className="tutor-bubble student-bubble">
+                    Can you explain why Dijkstra's algorithm fails with negative edge weights?
                   </div>
-
-                  <div className="citation-preview-card">
-                    <div className="citation-header">
-                      <span className="citation-badge">Grounding Source</span>
-                      <span className="citation-page">Page 14 · Paragraph 3</span>
-                    </div>
-                    <p className="citation-snippet">
-                      "In the Raft consensus algorithm, safety is guaranteed by the Leader Completeness property:
-                      if a log entry is committed in a given term, then that entry will be present in the logs of the leaders
-                      for all higher-numbered terms."
+                  <div className="tutor-bubble assistant-bubble">
+                    <p>
+                      <strong>Greedy Invariant Violation:</strong> Dijkstra assumes that once a vertex is marked visited,
+                      its shortest path is finalized. A negative edge can create a shorter subsequent path after a vertex
+                      is finalized, invalidating this greedy assumption.
                     </p>
                   </div>
                 </div>
@@ -197,64 +159,58 @@ db[l] = (1/m) * sum(dZ[l])`}
             </div>
           )}
 
-          {activeTab === 'planner' && (
-            <div className="stage-card stage-planner animate-fade-in">
+          {/* 03 - Concept Explorer */}
+          {activeTab === 'concept' && (
+            <div className="stage-card stage-concept animate-fade-in">
               <div className="stage-left">
-                <span className="stage-badge">03 · STRUCTURED LEARNING</span>
-                <h3 className="stage-title">Smart Study Planner</h3>
+                <span className="stage-badge">03 · KNOWLEDGE GRAPH</span>
+                <h3 className="stage-title">Concept Explorer</h3>
                 <p className="stage-desc">
-                  Transform your learning goals into organized study plans.
-                  Tell MindMate what topic you wish to master, your weekly available hours, your current skill level,
-                  and target deadline. MindMate synthesizes a prioritized milestone curriculum.
+                  Discover how core principles connect across your documents. MindMate maps prerequisite
+                  relationships and related theories so you can build mental models that stick.
                 </p>
                 <div className="stage-features-list">
                   <div className="feat-chip">
-                    <span className="chip-bullet">✦</span> Day-wise topic progression
+                    <span className="chip-bullet">✓</span> Prerequisite & dependent concept discovery
                   </div>
                   <div className="feat-chip">
-                    <span className="chip-bullet">✦</span> Priority weighted milestones (High / Medium / Low)
+                    <span className="chip-bullet">✓</span> Cross-document topic synthesis
                   </div>
                   <div className="feat-chip">
-                    <span className="chip-bullet">✦</span> Practical exercises & concept checklists
+                    <span className="chip-bullet">✓</span> Interactive concept drill-downs
                   </div>
                 </div>
-                <button className="stage-cta-btn" onClick={() => onSelectFeature?.('planner')}>
-                  Generate Study Plan →
+                <button className="stage-cta-btn" onClick={() => onSelectFeature?.('chat')}>
+                  Explore Concepts in Chat →
                 </button>
               </div>
 
               <div className="stage-right">
-                <div className="planner-timeline-mock">
-                  <div className="timeline-header">
-                    <div>
-                      <span className="timeline-eyebrow">CURRICULUM PREVIEW</span>
-                      <h4 className="timeline-title">Fullstack React & Next.js Architecture</h4>
-                    </div>
-                    <span className="timeline-hours">24 Total Hours</span>
+                <div className="concept-graph-preview">
+                  <div className="concept-node primary-node">
+                    <span className="node-kind">CORE CONCEPT</span>
+                    <strong>Backpropagation</strong>
                   </div>
-
-                  <div className="timeline-items">
-                    <div className="timeline-item">
-                      <div className="timeline-marker high"></div>
-                      <div className="timeline-info">
-                        <div className="timeline-top">
-                          <strong>State Synchronization & React 19 Actions</strong>
-                          <span className="timeline-badge high">HIGH PRIORITY</span>
-                        </div>
-                        <p className="timeline-sub">4 hours · Server components, useActionState, optimistic updates</p>
-                        <p className="timeline-exercise">Exercise: Build an optimistic comment stream with rollback</p>
+                  <div className="concept-links">
+                    <div className="link-item">
+                      <span className="link-arrow">↳</span>
+                      <div className="linked-node">
+                        <strong>Chain Rule (Calculus)</strong>
+                        <span>Mathematical foundation</span>
                       </div>
                     </div>
-
-                    <div className="timeline-item">
-                      <div className="timeline-marker medium"></div>
-                      <div className="timeline-info">
-                        <div className="timeline-top">
-                          <strong>Edge Caching & Streaming SSR</strong>
-                          <span className="timeline-badge medium">MEDIUM</span>
-                        </div>
-                        <p className="timeline-sub">6 hours · Partial Prerendering, Suspense boundaries, ISR</p>
-                        <p className="timeline-exercise">Exercise: Configure nested layouts with streaming data skeleton</p>
+                    <div className="link-item">
+                      <span className="link-arrow">↳</span>
+                      <div className="linked-node">
+                        <strong>Gradient Descent</strong>
+                        <span>Optimization algorithm</span>
+                      </div>
+                    </div>
+                    <div className="link-item">
+                      <span className="link-arrow">↳</span>
+                      <div className="linked-node">
+                        <strong>Vanishing Gradients</strong>
+                        <span>Architectural bottleneck</span>
                       </div>
                     </div>
                   </div>
@@ -263,66 +219,46 @@ db[l] = (1/m) * sum(dZ[l])`}
             </div>
           )}
 
-          {activeTab === 'models' && (
-            <div className="stage-card stage-models animate-fade-in">
+          {/* 04 - Smart Notes */}
+          {activeTab === 'notes' && (
+            <div className="stage-card stage-notes animate-fade-in">
               <div className="stage-left">
-                <span className="stage-badge">04 · MODEL ADAPTABILITY</span>
-                <h3 className="stage-title">Model Intelligence</h3>
+                <span className="stage-badge">04 · SYNTHESIS & REVISION</span>
+                <h3 className="stage-title">Smart Notes</h3>
                 <p className="stage-desc">
-                  Choose from available Groq AI models and personalize your AI chat experience.
-                  Dynamic model probing queries the Groq API in real-time, validating model health, context limits,
-                  and graceful fallback if a model undergoes maintenance.
+                  Transform lengthy lectures and readings into structured revision briefs.
+                  Generate key formula cheat-sheets, exam flashcards, and chronological topic summaries in seconds.
                 </p>
                 <div className="stage-features-list">
                   <div className="feat-chip">
-                    <span className="chip-bullet">✦</span> Live Groq API model probing & sync
+                    <span className="chip-bullet">✓</span> Structured summaries with key takeaways
                   </div>
                   <div className="feat-chip">
-                    <span className="chip-bullet">✦</span> Instant zero-downtime model switching
+                    <span className="chip-bullet">✓</span> Priority-ordered revision checklists
                   </div>
                   <div className="feat-chip">
-                    <span className="chip-bullet">✦</span> Persistent local storage preference
+                    <span className="chip-bullet">✓</span> Instant flashcard synthesis from PDFs
                   </div>
                 </div>
-                <button className="stage-cta-btn" onClick={() => onSelectFeature?.('chat')}>
-                  Select Dynamic Model →
+                <button className="stage-cta-btn" onClick={() => onSelectFeature?.('planner')}>
+                  Build Revision Plan →
                 </button>
               </div>
 
               <div className="stage-right">
-                <div className="model-selector-mock">
-                  <div className="mock-selector-header">
-                    <span>DYNAMIC GROQ REPOSITORY</span>
-                    <button className="mock-refresh-btn" title="Probe Groq API">↺ Refreshing live</button>
-                  </div>
-
-                  <div className="model-cards-stack">
-                    <div className="model-card-item active">
-                      <div className="model-card-radio">●</div>
-                      <div className="model-card-details">
-                        <strong>llama-3.3-70b-versatile</strong>
-                        <span>Top reasoning capability · 128k context window · 320 T/s</span>
-                      </div>
-                      <span className="model-rec-tag">Recommended</span>
+                <div className="smart-notes-preview">
+                  <div className="note-card">
+                    <div className="note-header">
+                      <span className="note-badge">REVISION NOTE</span>
+                      <span className="note-date">Generated from Lecture 08</span>
                     </div>
-
-                    <div className="model-card-item">
-                      <div className="model-card-radio">○</div>
-                      <div className="model-card-details">
-                        <strong>llama-3.1-8b-instant</strong>
-                        <span>Ultra-low latency conversational speed · 128k context</span>
-                      </div>
-                      <span className="model-speed-tag">Instant</span>
-                    </div>
-
-                    <div className="model-card-item">
-                      <div className="model-card-radio">○</div>
-                      <div className="model-card-details">
-                        <strong>mixtral-8x7b-32768</strong>
-                        <span>MoE balanced architecture · 32k context window</span>
-                      </div>
-                      <span className="model-speed-tag">MoE</span>
-                    </div>
+                    <h4 className="note-title">CAP Theorem & Distributed Consensus</h4>
+                    <ul className="note-bullet-list">
+                      <li><strong>Consistency:</strong> Every read receives the most recent write or an error.</li>
+                      <li><strong>Availability:</strong> Non-failing nodes return non-error responses.</li>
+                      <li><strong>Partition Tolerance:</strong> Sustained operation despite dropped network messages.</li>
+                    </ul>
+                    <div className="note-footer-tag">✦ Rule: In an asynchronous network, you must choose C or A.</div>
                   </div>
                 </div>
               </div>
