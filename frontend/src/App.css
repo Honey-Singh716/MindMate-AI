@@ -2753,10 +2753,49 @@
   position: relative;
   background: var(--ivory-off);
   color: var(--text-on-ivory);
+  overflow: hidden;
+}
+
+/* Subtle Academic Study Desk & Library Atmospheric Backdrop */
+.chat-study-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+  user-select: none;
+}
+
+.chat-backdrop-image {
+  position: absolute;
+  inset: -12px;
+  background-image: url('/chat-studio-bg.jpg');
+  background-size: cover;
+  background-position: right 18% bottom 16%;
+  background-repeat: no-repeat;
+  filter: blur(2px) contrast(1.02) saturate(0.95);
+  opacity: 0.42;
+  transform: scale(1.015);
+  will-change: transform, opacity;
+  transition: opacity 0.8s ease-out;
+}
+
+/* 88-94% Warm Ivory & Soft Cream Academic Overlay */
+.chat-backdrop-overlay {
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse at 80% 85%, rgba(245, 243, 235, 0.88) 0%, rgba(250, 249, 245, 0.92) 55%, rgba(245, 243, 235, 0.95) 100%),
+    linear-gradient(135deg, rgba(250, 249, 245, 0.93) 0%, rgba(245, 243, 235, 0.90) 50%, rgba(243, 240, 230, 0.94) 100%);
+  pointer-events: none;
 }
 
 /* Empty State / Welcome Experience */
 .chat-welcome-container, .chat-empty-state {
+  position: relative;
+  z-index: 1;
   flex: 1;
   overflow-y: auto;
   display: flex;
@@ -2911,6 +2950,8 @@
 
 /* Chat Stream & Conversation Container */
 .chat-stream-scroll-area, .chat-messages-scroll {
+  position: relative;
+  z-index: 1;
   flex: 1;
   min-height: 0;
   overflow-y: auto;
@@ -5605,6 +5646,16 @@
 }
 
 @media (max-width: 768px) {
+  .chat-backdrop-image {
+    background-position: right 30% bottom 10%;
+    filter: blur(2.5px) contrast(1.0);
+    opacity: 0.32;
+  }
+
+  .chat-backdrop-overlay {
+    background: rgba(250, 249, 245, 0.94);
+  }
+
   .hero-bg-photo {
     background-position: 68% bottom;
     filter: brightness(0.96) contrast(1.02) saturate(1.0);
