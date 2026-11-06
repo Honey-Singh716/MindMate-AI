@@ -2145,6 +2145,7 @@
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
+  position: relative;
   background: var(--ivory-off);
 }
 
@@ -2538,7 +2539,9 @@
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  background: var(--ivory-off);
+  background: transparent;
+  position: relative;
+  z-index: 10;
 }
 
 .workspace-topbar {
@@ -2548,8 +2551,12 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 28px;
-  background: #ffffff;
-  border-bottom: 1px solid var(--ivory-border);
+  background: rgba(255, 255, 255, 0.84);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(50, 75, 58, 0.12);
+  position: relative;
+  z-index: 20;
 }
 
 .topbar-left-cluster {
@@ -2747,7 +2754,8 @@
   flex-direction: column;
   overflow: hidden;
   position: relative;
-  background: var(--ivory-off);
+  background: transparent;
+  z-index: 1;
 }
 
 /* --------------------------------------------------------------------------
@@ -2759,7 +2767,7 @@
   display: flex;
   flex-direction: column;
   position: relative;
-  background: var(--ivory-off);
+  background: transparent;
   color: var(--text-on-ivory);
   overflow: hidden;
 }
@@ -2797,17 +2805,18 @@
   inset: 0;
   background: 
     linear-gradient(180deg, 
-      rgba(250, 249, 245, 0.60) 0%, 
+      rgba(250, 249, 245, 0.50) 0%, 
       transparent 12%, 
       transparent 82%, 
-      rgba(245, 243, 235, 0.70) 100%
+      rgba(245, 243, 235, 0.65) 100%
     ),
     linear-gradient(90deg, 
-      rgba(250, 249, 245, 0.86) 0%, 
-      rgba(247, 245, 238, 0.82) 32%, 
-      rgba(245, 243, 235, 0.60) 62%, 
-      rgba(245, 243, 235, 0.30) 86%, 
-      rgba(245, 243, 235, 0.20) 100%
+      rgba(250, 249, 245, 0.72) 0%, 
+      rgba(250, 249, 245, 0.80) 22%, 
+      rgba(247, 245, 238, 0.72) 48%, 
+      rgba(245, 243, 235, 0.46) 72%, 
+      rgba(245, 243, 235, 0.22) 90%, 
+      rgba(245, 243, 235, 0.16) 100%
     );
   pointer-events: none;
 }
@@ -3880,6 +3889,9 @@
   flex: 1;
   overflow-y: auto;
   padding: 36px 24px 80px;
+  position: relative;
+  z-index: 1;
+  background: transparent;
 }
 
 .study-tools-inner {
@@ -4312,6 +4324,9 @@
   flex: 1;
   overflow-y: auto;
   padding: 32px 24px 80px;
+  position: relative;
+  z-index: 1;
+  background: transparent;
 }
 
 .planner-content-container, .documents-content-container {
@@ -4954,12 +4969,17 @@
   flex: 1;
   overflow-y: auto;
   padding: 32px 24px 80px;
+  position: relative;
+  z-index: 1;
+  background: transparent;
 }
 
 .neural-upload-zone {
   border: 2px dashed var(--ivory-border);
   border-radius: var(--radius-xl);
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   padding: 44px 32px;
   text-align: center;
   cursor: pointer;

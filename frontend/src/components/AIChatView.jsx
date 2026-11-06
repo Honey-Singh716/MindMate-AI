@@ -88,12 +88,6 @@ export default function AIChatView({
 
   return (
     <div className="academic-chat-workspace">
-      {/* Subtle Academic Study Desk & Library Atmospheric Backdrop */}
-      <div className="chat-study-backdrop" aria-hidden="true">
-        <div className="chat-backdrop-image" />
-        <div className="chat-backdrop-overlay" />
-      </div>
-
       {!activeConversation || !hasHistory ? (
         /* Thoughtful Academic Empty State */
         <div className="chat-welcome-container animate-fade-in">

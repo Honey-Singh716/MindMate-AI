@@ -48,6 +48,12 @@ export default function AppLayout({
 
   return (
     <div className={`workspace-shell ${collapsed ? 'sidebar-collapsed' : ''}`}>
+      {/* Subtle Academic Atmospheric Backdrop (Shared across all workspace sections) */}
+      <div className="chat-study-backdrop" aria-hidden="true">
+        <div className="chat-backdrop-image" />
+        <div className="chat-backdrop-overlay" />
+      </div>
+
       {/* Mobile Drawer Backdrop */}
       {mobileMenuOpen && (
         <div
