@@ -5,6 +5,12 @@ export default function LearningExperienceSection({ onEnterApp }) {
 
   return (
     <section id="experience" className="experience-section">
+      {/* Subtle Academic Workspace Backdrop */}
+      <div className="experience-bg-backdrop" aria-hidden="true">
+        <div className="experience-bg-image" />
+        <div className="experience-bg-overlay" />
+      </div>
+
       <div className="section-container">
         {/* Section Header */}
         <div className="section-header-block">

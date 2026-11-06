@@ -1677,13 +1677,68 @@
 }
 
 /* --------------------------------------------------------------------------
-   7. LEARNING EXPERIENCE / WORKSPACE PREVIEW
+   7. LEARNING EXPERIENCE / WORKSPACE PREVIEW (Academic Study Environment)
    -------------------------------------------------------------------------- */
 .experience-section {
   background: var(--ivory-warm);
   color: var(--text-on-ivory);
   padding: 100px 0;
   position: relative;
+  overflow: hidden;
+}
+
+/* Subtle Academic Study Room Backdrop */
+.experience-bg-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.experience-bg-image {
+  position: absolute;
+  inset: 0;
+  background-image: url('/experience-bg.jpg');
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  opacity: 0.94;
+  filter: contrast(1.02) saturate(1.02);
+  transform: scale(1.01);
+  will-change: transform, opacity;
+}
+
+/* Subtle Warm Ivory Directional Overlay:
+   - Left side: light window, mug & stacked books remain softly visible (0.24-0.28)
+   - Center area for header & subtitle: subtle cream support (0.58-0.64) for pristine reading contrast
+   - Right side: natural oak bookshelf & cascading pothos/ivy remain clearly visible (0.22-0.26)
+   - Vertical edges: gentle gradient blend into neighboring sections */
+.experience-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg,
+      rgba(245, 243, 235, 0.40) 0%,
+      rgba(245, 243, 235, 0.12) 12%,
+      rgba(245, 243, 235, 0.12) 85%,
+      rgba(245, 243, 235, 0.60) 100%
+    ),
+    linear-gradient(90deg,
+      rgba(245, 243, 235, 0.28) 0%,
+      rgba(245, 243, 235, 0.58) 25%,
+      rgba(247, 245, 238, 0.64) 50%,
+      rgba(245, 243, 235, 0.56) 75%,
+      rgba(245, 243, 235, 0.22) 100%
+    );
+  pointer-events: none;
+}
+
+.experience-section .section-container {
+  position: relative;
+  z-index: 1;
 }
 
 .experience-section .section-tag {
@@ -1716,7 +1771,7 @@
   border: 1px solid var(--ivory-border);
   border-radius: var(--radius-xl);
   overflow: hidden;
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 16px 44px -8px rgba(16, 45, 37, 0.12), 0 4px 16px rgba(0, 0, 0, 0.04);
 }
 
 .frame-chrome-bar {
@@ -5820,7 +5875,8 @@
   }
 
   .methodology-bg-image,
-  .capabilities-bg-image {
+  .capabilities-bg-image,
+  .experience-bg-image {
     background-position: center top;
     filter: blur(1px) contrast(1.02);
   }
