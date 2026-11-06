@@ -11,6 +11,7 @@ export default function StudyPlannerView({
   onCreateConversation,
 }) {
   const [completedTopics, setCompletedTopics] = useState({})
+  const [showConversationTip, setShowConversationTip] = useState(false)
 
   function toggleTopic(index) {
     setCompletedTopics((prev) => ({
@@ -38,21 +39,22 @@ export default function StudyPlannerView({
           </p>
         </div>
 
-        {/* Notice if no conversation is active */}
-        {!activeConversation ? (
+        {/* Soft info banner when no conversation is active */}
+        {!activeConversation && (
           <div className="planner-notice-card">
             <span className="notice-icon">ℹ</span>
             <div className="notice-content">
-              <strong>Conversation Context Required</strong>
-              <p>MindMate attaches your curriculum to an active conversation thread so you can iterate on it.</p>
+              <strong>No Active Conversation</strong>
+              <p>Your study plan will be linked to a new conversation thread automatically when you generate it.</p>
             </div>
-            <button className="notice-action-btn" onClick={onCreateConversation}>
+            <button type="button" className="notice-action-btn" onClick={onCreateConversation}>
               Initialize Thread →
             </button>
           </div>
-        ) : (
-          /* Form */
-          <form className="planner-curriculum-form" onSubmit={onGeneratePlan}>
+        )}
+
+        {/* Form — always visible */}
+        <form className="planner-curriculum-form" onSubmit={onGeneratePlan}>
             <div className="form-field-group">
               <label className="field-label" htmlFor="plan-subject">
                 What do you want to learn?
@@ -155,7 +157,6 @@ export default function StudyPlannerView({
               )}
             </button>
           </form>
-        )}
 
         {/* Generated Plan Timeline Display */}
         {plan && (
