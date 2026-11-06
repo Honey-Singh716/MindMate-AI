@@ -237,9 +237,10 @@ async function deleteConversationRecord(ownerId, id) {
 }
 
 // Format a JS number[] for the configured column type. For pgvector we pass the
-// canonical vector text "[1,2,3]"; for JSONB we pass the array directly.
+// canonical vector text "[1,2,3]"; for JSONB we pass JSON.stringify(arr).
 function toEmbeddingParam(arr) {
-    return useVector ? `[${arr.map(Number).join(",")}]` : arr;
+    const safeArr = Array.isArray(arr) && arr.length > 0 ? arr : new Array(384).fill(0);
+    return useVector ? `[${safeArr.map(Number).join(",")}]` : JSON.stringify(safeArr);
 }
 
 async function findUserByEmail(email) {

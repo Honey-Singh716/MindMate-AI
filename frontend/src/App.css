@@ -3842,6 +3842,21 @@
   box-shadow: 0 0 32px rgba(128, 87, 229, 0.2);
 }
 
+.neural-upload-zone.uploading-state {
+  border-color: rgba(128, 87, 229, 0.5);
+  background: rgba(128, 87, 229, 0.08);
+  cursor: default;
+  pointer-events: none;
+}
+
+/* Upload visual icon wrapper */
+.upload-zone-visual {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .pdf-pulse-icon {
   width: 64px;
   height: 64px;
@@ -3851,6 +3866,98 @@
   color: #EF4444;
   display: grid;
   place-items: center;
+  transition: all 0.4s ease;
+}
+
+.pdf-pulse-icon.uploading {
+  background: rgba(128, 87, 229, 0.18);
+  border-color: rgba(128, 87, 229, 0.5);
+  color: var(--accent);
+  animation: iconPulse 2s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.06); opacity: 0.85; }
+}
+
+/* Spinning ring around the icon during upload */
+.zone-spinner-ring {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: var(--accent);
+  border-right-color: rgba(128, 87, 229, 0.3);
+  animation: spinRing 1.1s linear infinite;
+}
+
+@keyframes spinRing {
+  to { transform: rotate(360deg); }
+}
+
+/* Multi-stage upload progress dots */
+.upload-stage-track {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 10px auto 4px;
+}
+
+.stage-pip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  opacity: 0.35;
+  transition: all 0.4s ease;
+}
+
+.stage-pip.active {
+  opacity: 1;
+}
+
+.stage-pip.done {
+  opacity: 0.75;
+}
+
+.pip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: all 0.4s ease;
+}
+
+.stage-pip.active .pip-dot {
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(128, 87, 229, 0.7);
+  animation: pipPulse 0.9s ease-in-out infinite;
+}
+
+.stage-pip.done .pip-dot {
+  background: var(--success);
+}
+
+@keyframes pipPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.4); }
+}
+
+.pip-label {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+.stage-pip.active .pip-label {
+  color: var(--accent);
+}
+
+.stage-pip.done .pip-label {
+  color: var(--success);
 }
 
 .zone-title {
@@ -3862,6 +3969,7 @@
 .zone-desc {
   font-size: 13.5px;
   color: var(--text-secondary);
+  max-width: 400px;
 }
 
 .zone-browse-btn {
@@ -3872,6 +3980,13 @@
   font-size: 13.5px;
   font-weight: 600;
   box-shadow: 0 4px 16px rgba(128, 87, 229, 0.35);
+  transition: all 0.2s ease;
+}
+
+.zone-browse-btn:hover {
+  background: var(--accent);
+  box-shadow: 0 6px 20px rgba(128, 87, 229, 0.5);
+  transform: translateY(-1px);
 }
 
 .documents-section-head {

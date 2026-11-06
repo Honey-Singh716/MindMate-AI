@@ -24,10 +24,24 @@ export const API_BASE_URL = (
 export async function api(path, options = {}, token = localStorage.getItem('mindmate_token')) {
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) }
   if (token) headers.Authorization = `Bearer ${token}`
-  const response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers })
+
+  let response
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers })
+  } catch (netErr) {
+    const err = new Error('Could not connect to server. The backend may be spinning up from sleep. Please try again.')
+    err.isNetworkError = true
+    throw err
+  }
+
   const data = await response.json().catch(() => ({}))
   if (!response.ok) {
-    const err = new Error(data.error || 'Something went wrong. Please try again.')
+    const errorMsg = data.error || (
+      response.status === 504 || response.status === 502
+        ? 'Server is temporarily unavailable or restarting. Please try again.'
+        : 'Something went wrong. Please try again.'
+    )
+    const err = new Error(errorMsg)
     err.payload = data
     err.status = response.status
     throw err
@@ -45,18 +59,31 @@ export async function api(path, options = {}, token = localStorage.getItem('mind
 export async function apiUpload(path, formData, token = localStorage.getItem('mindmate_token')) {
   const headers = {}
   if (token) headers.Authorization = `Bearer ${token}`
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    method: 'POST',
-    headers,
-    body: formData,
-  })
+
+  let response
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      method: 'POST',
+      headers,
+      body: formData,
+    })
+  } catch (netErr) {
+    const err = new Error('Connection interrupted. The cloud backend may be waking up from cold sleep. Please try again.')
+    err.isNetworkError = true
+    throw err
+  }
+
   const data = await response.json().catch(() => ({}))
   if (!response.ok) {
-    const err = new Error(data.error || 'Upload failed. Please try again.')
+    const errorMsg = data.error || (
+      response.status === 504 || response.status === 502
+        ? 'Upload timed out while vectorizing. The cloud server is waking up — please try again.'
+        : 'Upload failed. Please try again.'
+    )
+    const err = new Error(errorMsg)
     err.payload = data
     err.status = response.status
     throw err
   }
   return data
 }
-

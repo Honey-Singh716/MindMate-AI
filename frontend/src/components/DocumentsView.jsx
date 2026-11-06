@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 export default function DocumentsView({
   documents = [],
@@ -10,7 +10,25 @@ export default function DocumentsView({
   onSwitchToChat,
 }) {
   const [isDragging, setIsDragging] = useState(false)
+  const [uploadStage, setUploadStage] = useState(0)
   const fileInputRef = useRef(null)
+
+  useEffect(() => {
+    if (!uploading) {
+      setUploadStage(0)
+      return
+    }
+    const t1 = setTimeout(() => setUploadStage(1), 2000)
+    const t2 = setTimeout(() => setUploadStage(2), 5000)
+    const t3 = setTimeout(() => setUploadStage(3), 9000)
+    const t4 = setTimeout(() => setUploadStage(4), 14000)
+    return () => {
+      clearTimeout(t1)
+      clearTimeout(t2)
+      clearTimeout(t3)
+      clearTimeout(t4)
+    }
+  }, [uploading])
 
   function handleDragOver(e) {
     e.preventDefault()
@@ -94,14 +112,23 @@ export default function DocumentsView({
           />
 
           <div className="upload-zone-visual">
-            <div className="pdf-pulse-icon">
-              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-                <polyline points="10 9 9 9 8 9"></polyline>
-              </svg>
+            <div className={`pdf-pulse-icon ${uploading ? 'uploading' : ''}`}>
+              {uploading ? (
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  {uploadStage === 0 && <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></>}
+                  {uploadStage === 1 && <><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="8" y1="8" x2="16" y2="8"></line><line x1="8" y1="12" x2="16" y2="12"></line><line x1="8" y1="16" x2="13" y2="16"></line></>}
+                  {uploadStage === 2 && <><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></>}
+                  {uploadStage >= 3 && <><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></>}
+                </svg>
+              ) : (
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+              )}
             </div>
             {uploading && <div className="zone-spinner-ring"></div>}
           </div>
@@ -109,8 +136,22 @@ export default function DocumentsView({
           <div className="upload-zone-text">
             {uploading ? (
               <>
-                <h3 className="zone-title">Vectorizing document...</h3>
-                <p className="zone-desc">Extracting text, computing MiniLM 384-dim embeddings, and storing chunks in PostgreSQL pgvector.</p>
+                <h3 className="zone-title">
+                  {uploadStage === 0 && 'Uploading to server…'}
+                  {uploadStage === 1 && 'Parsing PDF text…'}
+                  {uploadStage === 2 && 'Computing embeddings…'}
+                  {uploadStage === 3 && 'Saving to knowledge base…'}
+                  {uploadStage >= 4 && 'Finalizing…'}
+                </h3>
+                <div className="upload-stage-track">
+                  {['Upload', 'Parse', 'Embed', 'Save', 'Done'].map((label, i) => (
+                    <div key={label} className={`stage-pip ${uploadStage > i ? 'done' : uploadStage === i ? 'active' : ''}`}>
+                      <span className="pip-dot"></span>
+                      <span className="pip-label">{label}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="zone-desc">MiniLM 384-dim embeddings · pgvector storage · This may take 20–60s on first upload</p>
               </>
             ) : (
               <>

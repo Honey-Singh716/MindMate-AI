@@ -318,12 +318,15 @@ export default function App() {
       fd.append('file', file)
       const data = await apiUpload('/api/documents', fd)
       await loadDocuments()
-      showToast(`Document "${data.filename || file.name}" indexed successfully!`)
+      showToast(`✦ Document "${data.filename || file.name}" indexed — ${data.chunkCount || '?'} chunks ready!`, 4500)
       // Automatically enable RAG mode so user can query immediately
       setRagMode(true)
     } catch (e) {
-      const msg = e.message === 'Failed to fetch'
-        ? 'Could not connect to backend server. The upload timed out or the connection was interrupted. Please try again.'
+      // isNetworkError = true means the server couldn't be reached at all
+      // (e.g. Render cold-start SIGKILL or connection reset)
+      const isColdStart = e.isNetworkError || e.message === 'Failed to fetch'
+      const msg = isColdStart
+        ? 'The cloud server is waking up from sleep. This can take 30–60s. Please wait a moment and try again.'
         : e.message
       setUploadError(msg)
     } finally {
@@ -360,8 +363,10 @@ export default function App() {
     showToast('Signed out of MindMate')
   }
 
-  // Check existing session on mount
+  // Check existing session on mount & pre-warm Render backend immediately
   useEffect(() => {
+    api('/api/health').catch(() => {})
+
     const existingToken = localStorage.getItem(tokenKey)
     if (!existingToken) return
     api('/api/auth/me')
