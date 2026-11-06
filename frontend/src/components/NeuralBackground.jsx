@@ -1,9 +1,10 @@
 import { useEffect, useRef } from 'react'
 
 /**
- * MindMate 2.0 — Calm Academic Knowledge Network Background
- * Subtle, organic constellation of study nodes with thin sage connecting lines,
- * gentle opacity transitions, and minimal traveling light packets.
+ * MindMate 2.0 — Subtle Knowledge Network Background
+ * Restrained academic network behind the hero product preview.
+ * Zero random floating dust particles.
+ * Gentle opacity, thin sage links, and soft traveling light.
  * Fully respects prefers-reduced-motion.
  */
 export default function NeuralBackground({
@@ -12,7 +13,6 @@ export default function NeuralBackground({
   className = '',
 }) {
   const canvasRef = useRef(null)
-  const mousePos = useRef({ x: -1000, y: -1000, targetX: -1000, targetY: -1000 })
   const animFrameId = useRef(null)
 
   useEffect(() => {
@@ -21,19 +21,16 @@ export default function NeuralBackground({
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    // Check for prefers-reduced-motion
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
     let width = 0
     let height = 0
     let dpr = Math.min(window.devicePixelRatio || 1, 2)
 
-    // Academic node count: clean, uncluttered, breathable
-    const nodeCount = density === 'dense' ? 34 : density === 'sparse' ? 18 : 26
-    const particleCount = density === 'dense' ? 24 : 16
+    // Controlled node count for subtle background presence
+    const nodeCount = density === 'dense' ? 24 : density === 'sparse' ? 14 : 18
 
     let nodes = []
-    let particles = []
     let pulses = []
 
     function resize() {
@@ -56,25 +53,24 @@ export default function NeuralBackground({
 
     function initNodes() {
       nodes = []
-      particles = []
       pulses = []
 
-      // Generate calm study knowledge nodes clustered naturally on the right
+      // Cluster knowledge nodes primarily behind the right-hand preview
       for (let i = 0; i < nodeCount; i++) {
-        const isCluster = Math.random() > 0.35
-        const clusterCenterX = width * 0.65
-        const clusterCenterY = height * 0.44
-        const spread = Math.min(width, height) * 0.44
+        const isCluster = Math.random() > 0.25
+        const clusterCenterX = width > 900 ? width * 0.72 : width * 0.5
+        const clusterCenterY = height * 0.42
+        const spreadX = Math.min(width, height) * 0.42
+        const spreadY = Math.min(width, height) * 0.36
 
         const x = isCluster
-          ? clusterCenterX + (Math.random() - 0.5) * spread * 1.2
-          : Math.random() * width
+          ? clusterCenterX + (Math.random() - 0.5) * spreadX
+          : width * 0.3 + Math.random() * (width * 0.65)
         const y = isCluster
-          ? clusterCenterY + (Math.random() - 0.5) * spread * 1.05
-          : Math.random() * height
+          ? clusterCenterY + (Math.random() - 0.5) * spreadY
+          : height * 0.15 + Math.random() * (height * 0.7)
 
-        // Color palette: Sage Green (#B8CBB9) and Soft Mint (#DDEBE0)
-        const isMint = Math.random() > 0.6
+        const isMint = Math.random() > 0.65
         const nodeColor = isMint ? '#DDEBE0' : '#B8CBB9'
 
         nodes.push({
@@ -82,19 +78,19 @@ export default function NeuralBackground({
           y,
           baseX: x,
           baseY: y,
-          // Very gentle, slow academic drift (0.1 - 0.16)
-          vx: (Math.random() - 0.5) * 0.14,
-          vy: (Math.random() - 0.5) * 0.14,
-          radius: 1.6 + Math.random() * 1.8,
+          // Ultra-slow, calm academic drift (0.05 to 0.10)
+          vx: (Math.random() - 0.5) * 0.08,
+          vy: (Math.random() - 0.5) * 0.08,
+          radius: 1.5 + Math.random() * 1.5,
           color: nodeColor,
           pulsePhase: Math.random() * Math.PI * 2,
-          pulseSpeed: 0.012 + Math.random() * 0.016, // slow breathing
+          pulseSpeed: 0.01 + Math.random() * 0.012,
           connections: [],
         })
       }
 
-      // Precalculate connecting lines (thin knowledge links)
-      const maxDistance = Math.min(width, height) * 0.26
+      // Link nearby nodes with delicate connections
+      const maxDistance = Math.min(width, height) * 0.24
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
           const dx = nodes[i].x - nodes[j].x
@@ -104,18 +100,6 @@ export default function NeuralBackground({
             nodes[i].connections.push(j)
           }
         }
-      }
-
-      // Minimal subtle academic particles (drifting like quiet library dust)
-      for (let i = 0; i < particleCount; i++) {
-        particles.push({
-          x: Math.random() * width,
-          y: Math.random() * height,
-          vx: (Math.random() - 0.5) * 0.08,
-          vy: -0.06 - Math.random() * 0.12,
-          size: 0.8 + Math.random() * 1.2,
-          alpha: 0.12 + Math.random() * 0.22,
-        })
       }
     }
 
@@ -134,54 +118,38 @@ export default function NeuralBackground({
         x2: target.x,
         y2: target.y,
         progress: 0,
-        speed: 0.008 + Math.random() * 0.012, // slow, graceful traveling light
+        speed: 0.006 + Math.random() * 0.008,
         color: '#DDEBE0',
-        size: 1.8,
+        size: 1.6,
       })
     }
 
     let pulseTimer = 0
 
-    function handleMouseMove(e) {
-      if (!interactive || prefersReducedMotion) return
-      const rect = canvas.getBoundingClientRect()
-      mousePos.current.targetX = e.clientX - rect.left
-      mousePos.current.targetY = e.clientY - rect.top
-    }
-
-    function handleMouseLeave() {
-      mousePos.current.targetX = -1000
-      mousePos.current.targetY = -1000
-    }
-
     window.addEventListener('resize', resize)
-    if (interactive) {
-      window.addEventListener('mousemove', handleMouseMove, { passive: true })
-      document.addEventListener('mouseleave', handleMouseLeave)
-    }
-
     resize()
 
     function drawStaticFrame() {
       ctx.clearRect(0, 0, width, height)
 
-      // Background ambient gradient: Deep Forest (#102D25) to Forest Green (#174C3C)
+      // Ambient radial glow centered behind the right preview
+      const gradCenter = width > 900 ? width * 0.72 : width * 0.5
       const bgGrad = ctx.createRadialGradient(
-        width * 0.65,
-        height * 0.44,
-        40,
-        width * 0.65,
-        height * 0.44,
+        gradCenter,
+        height * 0.42,
+        30,
+        gradCenter,
+        height * 0.42,
         Math.max(width, height) * 0.65
       )
-      bgGrad.addColorStop(0, '#154234')
+      bgGrad.addColorStop(0, '#154033')
       bgGrad.addColorStop(0.5, '#102D25')
-      bgGrad.addColorStop(1, '#0C231D')
+      bgGrad.addColorStop(1, '#0C211B')
       ctx.fillStyle = bgGrad
       ctx.fillRect(0, 0, width, height)
 
-      // Draw connections
-      const maxDistance = Math.min(width, height) * 0.26
+      // Connections
+      const maxDistance = Math.min(width, height) * 0.24
       for (let i = 0; i < nodes.length; i++) {
         const node = nodes[i]
         for (let j = 0; j < node.connections.length; j++) {
@@ -192,125 +160,87 @@ export default function NeuralBackground({
           const dist = Math.sqrt(dx * dx + dy * dy)
           if (dist > maxDistance) continue
 
-          const alpha = (1 - dist / maxDistance) * 0.18
+          const alpha = (1 - dist / maxDistance) * 0.14
           ctx.beginPath()
           ctx.moveTo(node.x, node.y)
           ctx.lineTo(target.x, target.y)
           ctx.strokeStyle = `rgba(184, 203, 185, ${alpha})`
-          ctx.lineWidth = 0.8
+          ctx.lineWidth = 0.7
           ctx.stroke()
         }
       }
 
-      // Draw nodes
+      // Nodes
       for (let i = 0; i < nodes.length; i++) {
         const node = nodes[i]
-        ctx.fillStyle = node.color
         ctx.beginPath()
         ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2)
+        ctx.fillStyle = node.color
+        ctx.globalAlpha = 0.35
         ctx.fill()
+        ctx.globalAlpha = 1
       }
     }
 
-    // Animation Loop
-    function render() {
+    function animate() {
       if (prefersReducedMotion) return
 
       ctx.clearRect(0, 0, width, height)
 
-      // Smooth mouse interpolation
-      mousePos.current.x += (mousePos.current.targetX - mousePos.current.x) * 0.05
-      mousePos.current.y += (mousePos.current.targetY - mousePos.current.y) * 0.05
-
-      // Calm ambient academic depth (Deep Forest with soft emerald/sage ambient pool)
-      const radialDepth = ctx.createRadialGradient(
-        width * 0.64,
-        height * 0.44,
+      // Deep forest gradient
+      const gradCenter = width > 900 ? width * 0.72 : width * 0.5
+      const bgGrad = ctx.createRadialGradient(
+        gradCenter,
+        height * 0.42,
         30,
-        width * 0.64,
-        height * 0.44,
+        gradCenter,
+        height * 0.42,
         Math.max(width, height) * 0.65
       )
-      radialDepth.addColorStop(0, 'rgba(23, 76, 60, 0.45)')
-      radialDepth.addColorStop(0.45, 'rgba(16, 45, 37, 0.35)')
-      radialDepth.addColorStop(0.85, 'rgba(12, 35, 29, 0.2)')
-      radialDepth.addColorStop(1, 'rgba(10, 28, 23, 0)')
-      ctx.fillStyle = radialDepth
+      bgGrad.addColorStop(0, '#143D30')
+      bgGrad.addColorStop(0.55, '#102D25')
+      bgGrad.addColorStop(1, '#0C211B')
+      ctx.fillStyle = bgGrad
       ctx.fillRect(0, 0, width, height)
 
-      // Update & Draw Nodes
+      // Update & render knowledge nodes
+      const maxDistance = Math.min(width, height) * 0.24
+
       for (let i = 0; i < nodes.length; i++) {
-        const node = nodes[i]
+        const n = nodes[i]
+        n.x += n.vx
+        n.y += n.vy
 
-        // Organic oscillation
-        node.baseX += node.vx
-        node.baseY += node.vy
-        if (node.baseX < 0 || node.baseX > width) node.vx *= -1
-        if (node.baseY < 0 || node.baseY > height) node.vy *= -1
+        // Bound nodes gently around base positions
+        if (Math.abs(n.x - n.baseX) > 35) n.vx *= -1
+        if (Math.abs(n.y - n.baseY) > 30) n.vy *= -1
 
-        node.pulsePhase += node.pulseSpeed
+        n.pulsePhase += n.pulseSpeed
 
-        // Subtle mouse parallax
-        let dx = mousePos.current.x - node.baseX
-        let dy = mousePos.current.y - node.baseY
-        let mouseDist = Math.sqrt(dx * dx + dy * dy)
-        let offsetX = 0
-        let offsetY = 0
-
-        if (mouseDist < 200) {
-          const factor = (1 - mouseDist / 200) * 12
-          offsetX = -(dx / mouseDist) * factor
-          offsetY = -(dy / mouseDist) * factor
-        }
-
-        node.x = node.baseX + offsetX
-        node.y = node.baseY + offsetY
-
-        // Draw thin sage connecting lines
-        const maxDist = Math.min(width, height) * 0.26
-        for (let j = 0; j < node.connections.length; j++) {
-          const target = nodes[node.connections[j]]
+        // Draw connections
+        for (let j = 0; j < n.connections.length; j++) {
+          const target = nodes[n.connections[j]]
           if (!target) continue
+          const dx = n.x - target.x
+          const dy = n.y - target.y
+          const dist = Math.sqrt(dx * dx + dy * dy)
+          if (dist > maxDistance) continue
 
-          const cdx = node.x - target.x
-          const cdy = node.y - target.y
-          const cdist = Math.sqrt(cdx * cdx + cdy * cdy)
-          if (cdist > maxDist) continue
-
-          const alpha = (1 - cdist / maxDist) * 0.16
+          const alpha = (1 - dist / maxDistance) * 0.14
           ctx.beginPath()
-          ctx.moveTo(node.x, node.y)
+          ctx.moveTo(n.x, n.y)
           ctx.lineTo(target.x, target.y)
           ctx.strokeStyle = `rgba(184, 203, 185, ${alpha})`
-          ctx.lineWidth = Math.max(0.6, (1 - cdist / maxDist) * 1.1)
+          ctx.lineWidth = 0.7
           ctx.stroke()
         }
-
-        // Draw Knowledge Node
-        const pulse = Math.sin(node.pulsePhase)
-        const currentRadius = node.radius + pulse * 0.4
-        const nodeAlpha = 0.55 + pulse * 0.25
-
-        // Delicate academic halo
-        ctx.fillStyle = `rgba(184, 203, 185, ${nodeAlpha * 0.2})`
-        ctx.beginPath()
-        ctx.arc(node.x, node.y, currentRadius * 2.2, 0, Math.PI * 2)
-        ctx.fill()
-
-        // Crisp node core
-        ctx.fillStyle = node.color === '#DDEBE0'
-          ? `rgba(221, 235, 224, ${nodeAlpha})`
-          : `rgba(184, 203, 185, ${nodeAlpha})`
-        ctx.beginPath()
-        ctx.arc(node.x, node.y, currentRadius, 0, Math.PI * 2)
-        ctx.fill()
       }
 
-      // Traveling light packets along connections
+      // Draw subtle traveling light pulses
       pulseTimer++
-      if (pulseTimer > 45) {
+      if (pulseTimer > 180) {
+        spawnPulse()
         pulseTimer = 0
-        if (Math.random() > 0.4) spawnPulse()
       }
 
       for (let i = pulses.length - 1; i >= 0; i--) {
@@ -323,97 +253,58 @@ export default function NeuralBackground({
 
         const px = p.x1 + (p.x2 - p.x1) * p.progress
         const py = p.y1 + (p.y2 - p.y1) * p.progress
-        const pAlpha = Math.sin(p.progress * Math.PI) * 0.65
+        const pAlpha = Math.sin(p.progress * Math.PI) * 0.45
 
-        ctx.fillStyle = `rgba(221, 235, 224, ${pAlpha})`
         ctx.beginPath()
         ctx.arc(px, py, p.size, 0, Math.PI * 2)
+        ctx.fillStyle = p.color
+        ctx.globalAlpha = pAlpha
         ctx.fill()
+        ctx.globalAlpha = 1
       }
 
-      // Minimal floating particles
-      for (let i = 0; i < particles.length; i++) {
-        const pt = particles[i]
-        pt.x += pt.vx
-        pt.y += pt.vy
+      // Draw node dots with gentle breathing opacity
+      for (let i = 0; i < nodes.length; i++) {
+        const n = nodes[i]
+        const opacity = 0.28 + Math.sin(n.pulsePhase) * 0.16
 
-        if (pt.y < -10) {
-          pt.y = height + 10
-          pt.x = Math.random() * width
-        }
-        if (pt.x < -10) pt.x = width + 10
-        if (pt.x > width + 10) pt.x = -10
-
-        ctx.fillStyle = `rgba(245, 243, 235, ${pt.alpha})`
         ctx.beginPath()
-        ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2)
+        ctx.arc(n.x, n.y, n.radius, 0, Math.PI * 2)
+        ctx.fillStyle = n.color
+        ctx.globalAlpha = opacity
         ctx.fill()
+        ctx.globalAlpha = 1
       }
 
-      animFrameId.current = requestAnimationFrame(render)
+      animFrameId.current = requestAnimationFrame(animate)
     }
 
     if (!prefersReducedMotion) {
-      render()
+      animate()
     }
 
     return () => {
       window.removeEventListener('resize', resize)
-      if (interactive) {
-        window.removeEventListener('mousemove', handleMouseMove)
-        document.removeEventListener('mouseleave', handleMouseLeave)
-      }
       if (animFrameId.current) {
         cancelAnimationFrame(animFrameId.current)
       }
     }
-  }, [interactive, density])
+  }, [density, interactive])
 
   return (
-    <div
-      className={`neural-background-container ${className}`}
+    <canvas
+      ref={canvasRef}
+      className={`neural-canvas-layer ${className}`}
       style={{
         position: 'absolute',
-        inset: 0,
-        overflow: 'hidden',
-        pointerEvents: interactive ? 'auto' : 'none',
-        zIndex: 0,
-        backgroundColor: '#102D25',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        pointerEvents: 'none',
+        zIndex: 1,
       }}
-    >
-      {/* Subtle organic paper/canvas texture overlay */}
-      <div
-        className="academic-texture-overlay"
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'radial-gradient(ellipse at 70% 35%, rgba(23, 76, 60, 0.42), transparent 70%), linear-gradient(180deg, rgba(16, 45, 37, 0.3) 0%, rgba(16, 45, 37, 0.95) 100%)',
-          pointerEvents: 'none',
-        }}
-      />
-
-      {/* Calm Knowledge Network Canvas */}
-      <canvas
-        ref={canvasRef}
-        style={{
-          position: 'absolute',
-          inset: 0,
-          display: 'block',
-          width: '100%',
-          height: '100%',
-        }}
-      />
-
-      {/* Gentle vignette to ensure pristine typography readability */}
-      <div
-        className="academic-vignette"
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'linear-gradient(90deg, rgba(16, 45, 37, 0.92) 0%, rgba(16, 45, 37, 0.45) 45%, transparent 75%), linear-gradient(180deg, transparent 65%, rgba(16, 45, 37, 0.98) 100%)',
-          pointerEvents: 'none',
-        }}
-      />
-    </div>
+      aria-hidden="true"
+    />
   )
 }

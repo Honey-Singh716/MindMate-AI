@@ -3,7 +3,7 @@ import NeuralBackground from './NeuralBackground'
 export default function HeroSection({ onStartLearning, onExploreProduct }) {
   return (
     <section className="hero-section">
-      {/* Calm academic knowledge network canvas */}
+      {/* Subtle academic knowledge network behind the right preview */}
       <NeuralBackground
         interactive={true}
         density="normal"
@@ -19,7 +19,7 @@ export default function HeroSection({ onStartLearning, onExploreProduct }) {
             <span className="eyebrow-line"></span>
           </div>
 
-          {/* Main Heading with Editorial Serif Emphasis */}
+          {/* Main Heading with Balanced Editorial Serif Emphasis */}
           <h1 className="hero-headline">
             Beyond<br />
             <span className="hero-serif-accent">Traditional Learning.</span>
@@ -35,7 +35,7 @@ export default function HeroSection({ onStartLearning, onExploreProduct }) {
           <div className="hero-cta-group">
             <button className="hero-btn-primary" onClick={onStartLearning}>
               <span>Start Learning</span>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="5" y1="12" x2="19" y2="12"></line>
                 <polyline points="12 5 19 12 12 19"></polyline>
               </svg>
@@ -46,50 +46,65 @@ export default function HeroSection({ onStartLearning, onExploreProduct }) {
           </div>
         </div>
 
-        {/* Right Column: Realistic Document Intelligence & Study Product Preview */}
-        <div className="hero-visual-column desktop-only">
+        {/* Right Column: Visually Connected Document Intelligence Unit */}
+        <div className="hero-visual-column">
           <div className="hero-product-composition">
-            {/* 1. PDF Document Reader Preview */}
-            <div className="study-doc-window animate-fade-in">
-              <div className="doc-window-header">
-                <div className="doc-window-pills">
-                  <span className="pdf-type-badge">PDF</span>
-                  <span className="doc-name">Distributed_Systems · Lecture_04.pdf</span>
+            {/* 1. Connected Document Intelligence Experience Unit */}
+            <div className="doc-intelligence-unit animate-fade-in">
+              {/* PDF Document Reader Card */}
+              <div className="study-doc-window">
+                <div className="doc-window-header">
+                  <div className="doc-window-pills">
+                    <span className="pdf-type-badge">PDF</span>
+                    <span className="doc-name">Distributed_Systems · Lecture_04.pdf</span>
+                  </div>
+                  <span className="doc-page-counter">Page 14 of 42</span>
                 </div>
-                <span className="doc-page-counter">Page 14 of 42</span>
+
+                <div className="doc-window-content">
+                  <div className="academic-passage">
+                    <p className="passage-text">
+                      "In the Raft consensus algorithm, safety is maintained by enforcing that the leader’s log is{' '}
+                      <mark className="academic-highlight">always authoritative</mark> and complete across majorities.
+                      A candidate must receive votes from a strict quorum before assuming authority."
+                    </p>
+                  </div>
+
+                  <div className="artifact-concepts">
+                    <span className="concept-pill">✦ Quorum Majority</span>
+                    <span className="concept-pill">✦ Log Replication</span>
+                    <span className="concept-pill">✦ Leader Election</span>
+                  </div>
+                </div>
               </div>
 
-              <div className="doc-window-content">
-                <div className="academic-passage">
-                  <p className="passage-text">
-                    "In the Raft consensus algorithm, safety is maintained by enforcing that the leader’s log is{' '}
-                    <mark className="academic-highlight">always authoritative</mark> and complete across majorities.
-                    A candidate must receive votes from a strict quorum before assuming authority."
-                  </p>
+              {/* Visual Connector Stem */}
+              <div className="doc-ai-bridge">
+                <span className="bridge-stem"></span>
+                <div className="bridge-tag">
+                  <span className="bridge-dot"></span>
+                  <span>Grounded AI Synthesis · Citing p. 14</span>
                 </div>
+              </div>
 
-                <div className="artifact-concepts">
-                  <span className="concept-pill">✦ Quorum Majority</span>
-                  <span className="concept-pill">✦ Log Replication</span>
-                  <span className="concept-pill">✦ Leader Election</span>
+              {/* Contextual AI Explanation Card (Directly Connected) */}
+              <div className="ai-explanation-card animate-fade-up">
+                <div className="ai-explanation-head">
+                  <div className="ai-explanation-title-group">
+                    <span className="explanation-spark">✦</span>
+                    <span className="explanation-title">Contextual Explanation</span>
+                  </div>
+                  <span className="explanation-cite-tag">Match 0.92</span>
                 </div>
+                <p className="explanation-body">
+                  Raft guarantees safety by electing only candidates holding all committed entries.
+                  Because any majority quorum overlaps with the quorum that committed the prior entry,
+                  uncommitted entries can never overwrite established state.
+                </p>
               </div>
             </div>
 
-            {/* 2. Contextual AI Explanation Card (Overlay) */}
-            <div className="ai-explanation-card animate-fade-up">
-              <div className="ai-explanation-head">
-                <span className="explanation-spark">✦</span>
-                <span className="explanation-title">AI Study Explanation</span>
-                <span className="explanation-cite-tag">Citing p. 14</span>
-              </div>
-              <p className="explanation-body">
-                Raft ensures consensus by requiring a majority quorum. Candidates with outdated logs are rejected,
-                preventing uncommitted entries from ever overwriting committed state.
-              </p>
-            </div>
-
-            {/* 3. Restrained Neural Engine Active Status Indicator */}
+            {/* 2. Neural Engine Active Status Indicator */}
             <div className="hero-synaptic-card">
               <div className="synaptic-card-header">
                 <span className="pulse-dot-academic"></span>
@@ -98,7 +113,7 @@ export default function HeroSection({ onStartLearning, onExploreProduct }) {
               <div className="synaptic-card-body">
                 <div className="synaptic-metric">
                   <span className="metric-val">Groq Llama 3.3</span>
-                  <span className="metric-lbl">Inference Engine</span>
+                  <span className="metric-lbl">Inference Acceleration</span>
                 </div>
                 <div className="synaptic-divider"></div>
                 <div className="synaptic-metric">

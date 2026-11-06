@@ -347,18 +347,28 @@
 }
 
 .hero-headline {
-  font-size: clamp(44px, 5.5vw, 68px);
+  font-size: clamp(38px, 4.8vw, 56px);
   font-weight: 700;
-  line-height: 1.08;
-  letter-spacing: -0.03em;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
   color: var(--ivory-warm);
+  max-width: 520px;
+}
+
+.hero-serif-accent {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--sage-green);
+  display: inline-block;
+  letter-spacing: -0.015em;
 }
 
 .hero-subtext {
-  font-size: 17px;
+  font-size: 16.5px;
   line-height: 1.6;
   color: var(--text-on-forest-2);
-  max-width: 520px;
+  max-width: 500px;
 }
 
 .hero-cta-group {
@@ -416,10 +426,19 @@
 .hero-product-composition {
   position: relative;
   width: 100%;
-  max-width: 480px;
+  max-width: 490px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
+}
+
+/* Visually connected Document Intelligence Experience Unit */
+.doc-intelligence-unit {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.45);
 }
 
 .study-doc-window, .study-artifact-card {
@@ -427,7 +446,7 @@
   border: 1px solid var(--forest-border-mid);
   border-radius: var(--radius-lg);
   padding: 24px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-md);
   position: relative;
 }
 
@@ -481,11 +500,23 @@
 }
 
 .academic-highlight {
-  background: rgba(221, 235, 224, 0.25);
+  background: rgba(184, 203, 185, 0.22);
   color: #ffffff;
   padding: 2px 6px;
   border-radius: 3px;
   border-bottom: 2px solid var(--sage-green);
+  animation: highlightBreathe 3.5s ease-in-out infinite;
+}
+
+@keyframes highlightBreathe {
+  0%, 100% {
+    background: rgba(184, 203, 185, 0.2);
+    border-bottom-color: rgba(184, 203, 185, 0.5);
+  }
+  50% {
+    background: rgba(184, 203, 185, 0.38);
+    border-bottom-color: var(--soft-mint);
+  }
 }
 
 .artifact-concepts {
@@ -502,6 +533,48 @@
   background: rgba(184, 203, 185, 0.12);
   color: var(--soft-mint);
   border: 1px solid rgba(184, 203, 185, 0.22);
+}
+
+/* Document to AI Bridge Connector */
+.doc-ai-bridge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 20px;
+  position: relative;
+  z-index: 2;
+  margin: -6px 0 -6px 0;
+}
+
+.bridge-stem {
+  width: 2px;
+  height: 22px;
+  background: linear-gradient(180deg, var(--sage-green) 0%, rgba(184, 203, 185, 0.3) 100%);
+  margin-left: 24px;
+}
+
+.bridge-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--soft-mint);
+  background: rgba(16, 45, 37, 0.95);
+  border: 1px solid var(--forest-border-mid);
+  padding: 4px 12px;
+  border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(8px);
+}
+
+.bridge-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--soft-mint);
+  box-shadow: 0 0 6px var(--soft-mint);
 }
 
 /* Contextual AI Explanation Overlay Card */
@@ -1124,20 +1197,38 @@
 }
 
 /* --------------------------------------------------------------------------
-   6. HOW IT WORKS SECTION (4-Step Pipeline)
+   6. HOW IT WORKS SECTION (4-Step Pipeline - Soft Sage Surface)
    -------------------------------------------------------------------------- */
 .how-section {
-  background: var(--forest-deep);
-  color: var(--text-on-forest);
+  background: var(--ivory-sage);
+  color: var(--text-on-ivory);
   padding: 100px 0;
   position: relative;
+  border-top: 1px solid var(--ivory-border);
+  border-bottom: 1px solid var(--ivory-border);
+}
+
+.how-section .section-tag {
+  color: var(--forest-green);
+}
+
+.how-section .tag-spark {
+  color: var(--forest-green);
+}
+
+.how-section .section-title {
+  color: var(--forest-deep);
 }
 
 .how-section .serif-accent {
-  color: var(--sage-green);
+  color: var(--forest-green);
   font-family: var(--font-serif);
   font-style: italic;
   font-weight: 400;
+}
+
+.how-section .section-subtitle {
+  color: var(--text-on-ivory-2);
 }
 
 .pipeline-four-steps {
@@ -1148,8 +1239,8 @@
 }
 
 .pipeline-step-card {
-  background: var(--forest-surface);
-  border: 1px solid var(--forest-border);
+  background: #ffffff;
+  border: 1px solid var(--ivory-border);
   border-radius: var(--radius-lg);
   padding: 24px;
   text-align: left;
@@ -1157,17 +1248,21 @@
   flex-direction: column;
   gap: 10px;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
 }
 
 .pipeline-step-card:hover {
-  background: var(--forest-elevated);
+  background: #ffffff;
   border-color: var(--forest-border-mid);
   transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .pipeline-step-card.active {
-  background: var(--forest-elevated);
-  border-color: var(--sage-green);
+  background: #ffffff;
+  border-color: var(--forest-green);
+  border-width: 1.5px;
   box-shadow: var(--shadow-md);
 }
 
@@ -1181,37 +1276,37 @@
   font-family: var(--font-mono);
   font-size: 16px;
   font-weight: 700;
-  color: var(--sage-green);
+  color: var(--forest-green);
 }
 
 .step-active-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--soft-mint);
-  box-shadow: 0 0 8px var(--soft-mint);
+  background: var(--forest-green);
+  box-shadow: 0 0 8px rgba(23, 76, 60, 0.4);
 }
 
 .step-card-title {
   font-size: 15px;
   font-weight: 700;
-  color: var(--ivory-warm);
+  color: var(--forest-deep);
 }
 
 .step-card-sub {
   font-size: 12px;
-  color: var(--text-on-forest-2);
+  color: var(--text-on-ivory-2);
 }
 
 .pipeline-stage-panel {
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
   gap: 48px;
-  background: var(--forest-surface);
-  border: 1px solid var(--forest-border-mid);
+  background: #ffffff;
+  border: 1px solid var(--ivory-border);
   border-radius: var(--radius-xl);
   padding: 48px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-card);
   align-items: center;
 }
 
@@ -1232,29 +1327,29 @@
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.1em;
-  color: var(--soft-mint);
+  color: var(--forest-green);
 }
 
 .step-subtitle {
   font-size: 12px;
-  color: var(--text-on-forest-3);
+  color: var(--text-on-ivory-3);
 }
 
 .stage-panel-title {
   font-size: 32px;
   font-weight: 700;
-  color: var(--ivory-warm);
+  color: var(--forest-deep);
 }
 
 .stage-panel-desc {
   font-size: 15.5px;
   line-height: 1.6;
-  color: var(--text-on-forest-2);
+  color: var(--text-on-ivory-2);
 }
 
 .stage-spec-box {
-  background: rgba(12, 33, 27, 0.6);
-  border: 1px solid var(--forest-border);
+  background: var(--ivory-off);
+  border: 1px solid var(--ivory-border);
   border-radius: var(--radius-md);
   padding: 14px 18px;
   display: flex;
@@ -1267,13 +1362,13 @@
   font-size: 9.5px;
   font-weight: 700;
   letter-spacing: 0.1em;
-  color: var(--sage-green);
+  color: var(--forest-green);
 }
 
 .spec-code {
   font-family: var(--font-mono);
   font-size: 12px;
-  color: var(--ivory-warm);
+  color: var(--forest-deep);
 }
 
 .stage-nav-controls {
@@ -1286,28 +1381,28 @@
 .stage-nav-btn {
   padding: 10px 20px;
   border-radius: 999px;
-  background: transparent;
-  border: 1px solid var(--forest-border-mid);
-  color: var(--ivory-warm);
+  background: #ffffff;
+  border: 1px solid var(--ivory-border);
+  color: var(--forest-deep);
   font-size: 13px;
   font-weight: 500;
   transition: all 0.2s ease;
 }
 
 .stage-nav-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: var(--sage-green);
+  background: var(--ivory-off);
+  border-color: var(--forest-green);
 }
 
 .stage-nav-btn.next-btn {
-  background: var(--ivory-warm);
-  color: var(--forest-deep);
+  background: var(--forest-green);
+  color: var(--ivory-warm);
   border-color: transparent;
   font-weight: 600;
 }
 
 .stage-nav-btn.next-btn:hover:not(:disabled) {
-  background: #ffffff;
+  background: var(--forest-deep);
 }
 
 .stage-nav-btn:disabled {
@@ -3707,7 +3802,15 @@
   }
 
   .hero-visual-column {
-    display: none;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .hero-product-composition {
+    max-width: 520px;
+    width: 100%;
   }
 
   .hero-bottom-strip {
@@ -3756,7 +3859,19 @@
   }
 
   .hero-headline {
-    font-size: 38px;
+    font-size: clamp(32px, 8vw, 42px);
+  }
+
+  .hero-product-composition {
+    max-width: 100%;
+  }
+
+  .study-doc-window, .study-artifact-card {
+    padding: 18px;
+  }
+
+  .pipeline-four-steps {
+    grid-template-columns: 1fr;
   }
 
   .hero-cta-group {
