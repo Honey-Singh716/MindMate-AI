@@ -67,9 +67,9 @@ export default function AppLayout({
           >
             <span className="academic-logo-badge">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#F5F3EB" />
-                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#F5F3EB" fill="rgba(245, 243, 235, 0.12)" />
-                <circle cx="12" cy="10" r="1.5" fill="#DDEBE0" />
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#174C3C" />
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#174C3C" fill="rgba(23, 76, 60, 0.12)" />
+                <circle cx="12" cy="10" r="1.5" fill="#174C3C" />
               </svg>
             </span>
             {!collapsed && (
@@ -220,12 +220,12 @@ export default function AppLayout({
                             ●
                           </span>
                         )}
-                        <span className="thread-title-text">{conv.title}</span>
+                        <span className="thread-title-text">{conv.title || 'New conversation'}</span>
                       </button>
 
                       {/* 3-Dot Actions Dropdown */}
                       <details className="thread-menu-dropdown">
-                        <summary aria-label={`Actions for ${conv.title}`}>⋯</summary>
+                        <summary aria-label={`Actions for ${conv.title || 'conversation'}`}>⋯</summary>
                         <div className="thread-menu-popover">
                           <button
                             onClick={(e) => {

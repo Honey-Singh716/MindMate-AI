@@ -34,6 +34,9 @@
   --text-on-ivory-2:   #4A5248;
   --text-on-ivory-3:   #737B73;
 
+  /* Semantic alias used throughout App.css */
+  --charcoal:          #202923;
+
   /* Semantic */
   --danger:            #C0514A;
   --danger-bg:         rgba(192, 81, 74, 0.1);

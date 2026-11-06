@@ -68,8 +68,8 @@
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  background: rgba(184, 203, 185, 0.15);
-  border: 1px solid rgba(184, 203, 185, 0.3);
+  background: var(--forest-green);
+  border: 1px solid rgba(23, 76, 60, 0.4);
   color: var(--ivory-warm);
 }
 
