@@ -5,6 +5,12 @@ export default function ProductSection({ onSelectFeature }) {
 
   return (
     <section id="product" className="product-section">
+      {/* Subtle Academic Library Atmosphere Backdrop */}
+      <div className="capabilities-bg-backdrop" aria-hidden="true">
+        <div className="capabilities-bg-image" />
+        <div className="capabilities-bg-overlay" />
+      </div>
+
       <div className="section-container">
         {/* Section Header */}
         <div className="section-header-block">

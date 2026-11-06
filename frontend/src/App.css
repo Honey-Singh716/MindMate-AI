@@ -881,6 +881,61 @@
   color: var(--text-on-ivory);
   padding: 100px 0;
   position: relative;
+  overflow: hidden;
+}
+
+/* Subtle Academic Library Atmosphere Backdrop */
+.capabilities-bg-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.capabilities-bg-image {
+  position: absolute;
+  inset: 0;
+  background-image: url('/capabilities-bg.jpg');
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  opacity: 0.95;
+  filter: contrast(1.02) saturate(1.02);
+  transform: scale(1.01);
+  will-change: transform, opacity;
+}
+
+/* Directional Warm Ivory Overlay:
+   - Upper-left botanical shadows remain softly visible (0.28-0.35)
+   - Center negative space for title & tabs is gently supported (0.68-0.74) for crisp text contrast
+   - Right bookshelf and faint open book catch soft daylight (0.22-0.30)
+   - Top & bottom softly blend with adjoining page sections */
+.capabilities-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg,
+      rgba(245, 243, 235, 0.45) 0%,
+      rgba(245, 243, 235, 0.15) 12%,
+      rgba(245, 243, 235, 0.15) 85%,
+      rgba(245, 243, 235, 0.65) 100%
+    ),
+    linear-gradient(90deg,
+      rgba(245, 243, 235, 0.32) 0%,
+      rgba(245, 243, 235, 0.68) 25%,
+      rgba(247, 245, 238, 0.74) 50%,
+      rgba(245, 243, 235, 0.62) 75%,
+      rgba(245, 243, 235, 0.22) 100%
+    );
+  pointer-events: none;
+}
+
+.product-section .section-container {
+  position: relative;
+  z-index: 1;
 }
 
 .product-section .section-tag {
@@ -940,9 +995,11 @@
 
 .cap-tab.active {
   color: var(--forest-deep);
-  background: var(--ivory-off);
-  box-shadow: var(--shadow-sm);
+  background: rgba(250, 249, 245, 0.95);
+  box-shadow: 0 2px 10px rgba(16, 45, 37, 0.06);
   border: 1px solid var(--ivory-border);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .capability-stage {
@@ -954,11 +1011,13 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 48px;
-  background: var(--ivory-off);
+  background: rgba(250, 249, 245, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--ivory-border);
   border-radius: var(--radius-xl);
   padding: 48px;
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 10px 32px rgba(16, 45, 37, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
   align-items: center;
 }
 
