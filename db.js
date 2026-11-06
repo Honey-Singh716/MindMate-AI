@@ -1,5 +1,6 @@
 const { Pool } = require("pg");
 const crypto = require("node:crypto");
+const { reciprocalRankFusion } = require("./systemDesign");
 
 let pool;
 let schemaReady;
@@ -95,6 +96,29 @@ async function ensureRagSchema() {
             await getPool().query("CREATE INDEX IF NOT EXISTS documents_owner_idx ON documents(owner_id)");
             await getPool().query("CREATE INDEX IF NOT EXISTS chunks_owner_idx ON chunks(owner_id)");
             await getPool().query("CREATE INDEX IF NOT EXISTS chunks_document_idx ON chunks(document_id)");
+
+            // Vector index: HNSW graph for fast nearest neighbor search (Concept 13)
+            if (useVector) {
+                try {
+                    await getPool().query(`
+                        CREATE INDEX IF NOT EXISTS chunks_embedding_hnsw_idx 
+                        ON chunks USING hnsw (embedding vector_cosine_ops) 
+                        WITH (m = 16, ef_construction = 64);
+                    `);
+                } catch {
+                    // Falls back cleanly if HNSW parameters or pgvector version differs
+                }
+            }
+
+            // Database full-text index for Hybrid Search (Concepts 4 & 14)
+            try {
+                await getPool().query(`
+                    CREATE INDEX IF NOT EXISTS chunks_content_fts_idx 
+                    ON chunks USING gin (to_tsvector('english', content));
+                `);
+            } catch {
+                // Falls back cleanly if GIN configuration is restricted
+            }
         })().catch((error) => {
             ragSchemaReady = null;
             throw error;
@@ -347,9 +371,9 @@ function cosine(a, b) {
 }
 
 // Returns the most relevant chunks for a question embedding, scoped to the
-// user. With pgvector: ORDER BY embedding <=> query (cosine distance). Without
-// pgvector: fetch the user's chunks and rank with cosine similarity in Node.
-async function retrieveChunks(ownerId, queryEmbedding, { documentIds = null, topK = 5 } = {}) {
+// user (Concept 23: Tenant Isolation).
+// Concept 14: Hybrid Search (Vector similarity + Keyword match merged via RRF).
+async function retrieveChunks(ownerId, queryEmbedding, { documentIds = null, topK = 5, queryText = "" } = {}) {
     await ensureRagSchema();
 
     if (useVector) {
@@ -360,10 +384,10 @@ async function retrieveChunks(ownerId, queryEmbedding, { documentIds = null, top
             filterIds = " AND c.document_id = ANY($3)";
             params.push(documentIds);
         }
-        params.push(topK);
+        params.push(topK * 2);
         const limitParam = `$${params.length}`;
-        const result = await getPool().query(
-            `SELECT c.content, c.page, d.id AS document_id, d.filename,
+        const vectorResult = await getPool().query(
+            `SELECT c.content, c.page, c.chunk_index, d.id AS document_id, d.filename,
                     1 - (c.embedding <=> $1::vector) AS score
              FROM chunks c JOIN documents d ON d.id = c.document_id
              WHERE c.owner_id = $2${filterIds}
@@ -371,13 +395,56 @@ async function retrieveChunks(ownerId, queryEmbedding, { documentIds = null, top
              LIMIT ${limitParam}`,
             params
         );
-        return result.rows.map((r) => ({
+        const vectorHits = vectorResult.rows.map((r) => ({
+            id: `${r.document_id}:${r.page}:${r.chunk_index}`,
             content: r.content,
             page: r.page,
             documentId: r.document_id,
             filename: r.filename,
             score: r.score,
         }));
+
+        // Keyword search for hybrid fusion if queryText is provided
+        if (queryText && queryText.trim()) {
+            try {
+                const cleanQuery = queryText.trim().replace(/[^\w\s]/g, " ").trim();
+                if (cleanQuery) {
+                    const kwParams = [cleanQuery, ownerId];
+                    let kwFilter = "";
+                    if (Array.isArray(documentIds) && documentIds.length) {
+                        kwFilter = " AND c.document_id = ANY($3)";
+                        kwParams.push(documentIds);
+                    }
+                    kwParams.push(topK * 2);
+                    const kwLimit = `$${kwParams.length}`;
+                    const kwResult = await getPool().query(
+                        `SELECT c.content, c.page, c.chunk_index, d.id AS document_id, d.filename,
+                                ts_rank_cd(to_tsvector('english', c.content), plainto_tsquery('english', $1)) AS score
+                         FROM chunks c JOIN documents d ON d.id = c.document_id
+                         WHERE c.owner_id = $2 AND to_tsvector('english', c.content) @@ plainto_tsquery('english', $1)${kwFilter}
+                         ORDER BY score DESC
+                         LIMIT ${kwLimit}`,
+                        kwParams
+                    );
+                    const keywordHits = kwResult.rows.map((r) => ({
+                        id: `${r.document_id}:${r.page}:${r.chunk_index}`,
+                        content: r.content,
+                        page: r.page,
+                        documentId: r.document_id,
+                        filename: r.filename,
+                        score: r.score,
+                    }));
+
+                    if (keywordHits.length > 0) {
+                        return reciprocalRankFusion(vectorHits, keywordHits, { k: 60, topK });
+                    }
+                }
+            } catch {
+                // If text query fails, vector results are returned safely
+            }
+        }
+
+        return vectorHits.slice(0, topK);
     }
 
     const params = [ownerId];
@@ -387,7 +454,7 @@ async function retrieveChunks(ownerId, queryEmbedding, { documentIds = null, top
         params.push(documentIds);
     }
     const result = await getPool().query(
-        `SELECT c.content, c.page, c.embedding, d.id AS document_id, d.filename
+        `SELECT c.content, c.page, c.chunk_index, c.embedding, d.id AS document_id, d.filename
          FROM chunks c JOIN documents d ON d.id = c.document_id
          WHERE c.owner_id = $1${filterIds}`,
         params
@@ -395,6 +462,7 @@ async function retrieveChunks(ownerId, queryEmbedding, { documentIds = null, top
     const scored = result.rows.map((r) => {
         const emb = Array.isArray(r.embedding) ? r.embedding : JSON.parse(r.embedding || "[]");
         return {
+            id: `${r.document_id}:${r.page}:${r.chunk_index}`,
             content: r.content,
             page: r.page,
             documentId: r.document_id,
@@ -403,6 +471,28 @@ async function retrieveChunks(ownerId, queryEmbedding, { documentIds = null, top
         };
     });
     scored.sort((a, b) => b.score - a.score);
+
+    // Hybrid keyword boost in memory if queryText provided
+    if (queryText && queryText.trim()) {
+        const terms = queryText.toLowerCase().split(/\s+/).filter((t) => t.length > 2);
+        if (terms.length > 0) {
+            const keywordMatches = [];
+            for (const item of scored) {
+                const textLower = item.content.toLowerCase();
+                let matches = 0;
+                for (const t of terms) {
+                    if (textLower.includes(t)) matches += 1;
+                }
+                if (matches > 0) {
+                    keywordMatches.push({ ...item, score: matches / terms.length });
+                }
+            }
+            if (keywordMatches.length > 0) {
+                return reciprocalRankFusion(scored.slice(0, topK * 2), keywordMatches, { k: 60, topK });
+            }
+        }
+    }
+
     return scored.slice(0, topK);
 }
 

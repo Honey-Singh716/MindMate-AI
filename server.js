@@ -1,4 +1,4 @@
-﻿const fs = require("node:fs/promises");
+const fs = require("node:fs/promises");
 const fsSync = require("node:fs");
 const path = require("node:path");
 const http = require("node:http");
@@ -19,6 +19,20 @@ const {
 const modelsApi = require("./models");
 const rag = require("./rag");
 const embeddings = require("./embeddings");
+const {
+    globalCircuitBreaker,
+    globalResponseCache,
+    globalTokenBudgets,
+    globalConcurrencyLimiter,
+    withRetryAndBackoff,
+    routeModel,
+    DEFAULT_FALLBACK_CHAIN,
+    checkInputGuardrails,
+    sanitizeOutput,
+    estimateTokenCount,
+    AgentTracer,
+    maybeRunShadowEval,
+} = require("./systemDesign");
 
 const PORT = Number(process.env.PORT) || 3000;
 const PUBLIC_DIR = process.env.PUBLIC_DIR || (fsSync.existsSync(path.join(__dirname, "frontend", "dist")) ? path.join(__dirname, "frontend", "dist") : path.join(__dirname, "public"));
@@ -306,16 +320,55 @@ function isRetryableError(error) {
 }
 
 async function generateWithRetry(request, maxRetries = 3) {
-    for (let attempt = 0; ; attempt++) {
-        try {
-            return await getGroqClient().chat.completions.create(request);
-        } catch (error) {
-            if (attempt >= maxRetries || !isRetryableError(error)) {
-                throw error;
+    // Concept 10: Backpressure / Concurrency Limiter
+    return globalConcurrencyLimiter.run(async () => {
+        // Concept 9: Circuit Breaker for Upstream LLM Provider
+        return globalCircuitBreaker.execute(async () => {
+            // Concept 17: Fallback Models Chain
+            const requestedModel = request.model;
+            const modelsToTry = [
+                requestedModel,
+                ...DEFAULT_FALLBACK_CHAIN.filter((m) => m !== requestedModel),
+            ];
+
+            let lastError = null;
+            for (const candidateModel of modelsToTry) {
+                try {
+                    const candidateRequest = { ...request, model: candidateModel };
+                    // Concept 3: Retries with Exponential Backoff & Jitter
+                    return await withRetryAndBackoff(
+                        async () => getGroqClient().chat.completions.create(candidateRequest),
+                        {
+                            maxAttempts: maxRetries,
+                            baseDelayMs: 1000,
+                            maxDelayMs: 12000,
+                            shouldRetry: isRetryableError,
+                        }
+                    );
+                } catch (error) {
+                    lastError = error;
+                    // If model is discontinued or unsupported, fall back to next model immediately
+                    if (isModelError(error) || error?.status === 404 || error?.status === 400) {
+                        logEvent("model_fallback_switched", {
+                            fromModel: candidateModel,
+                            reason: error.message,
+                        });
+                        continue;
+                    }
+                    // If transient retries exhausted, also attempt fallback model before throwing
+                    if (isRetryableError(error)) {
+                        logEvent("transient_model_fallback", {
+                            fromModel: candidateModel,
+                            reason: error.message,
+                        });
+                        continue;
+                    }
+                    throw error;
+                }
             }
-            await new Promise((resolve) => setTimeout(resolve, 1000 * 2 ** attempt));
-        }
-    }
+            throw lastError;
+        });
+    });
 }
 
 function createConversation(title = "New conversation") {
@@ -473,7 +526,8 @@ async function chatWithAI(conversation, model, ragContext) {
     if (!answer) {
         throw new Error("The AI returned an empty response.");
     }
-    return answer;
+    // Concept 20: Output Guardrail - redact any sensitive tokens or database credentials
+    return sanitizeOutput(answer);
 }
 
 function mockChat(message) {
@@ -1131,17 +1185,48 @@ async function handleApi(request, response, store) {
 
     const body = await requestBody(request);
     if (request.method === "POST" && parts[3] === "chat") {
+        // Concept 21: Agent Tracing & Observability
+        const tracer = new AgentTracer();
+        const chatSpan = tracer.startSpan("chat_turn", { userId: user.sub, conversationId: parts[2] });
+
         let message;
         try {
             message = validateChatInput(body);
         } catch (error) {
+            chatSpan.end(error);
             sendJson(response, 400, { error: error.message });
             return;
         }
+
+        // Concept 20: Input Guardrail (prompt injection & malicious bypass detection)
+        const guardrail = checkInputGuardrails(message);
+        if (!guardrail.safe) {
+            logEvent("guardrail_intercepted", { userId: user.sub, reason: guardrail.reason });
+            chatSpan.end(new Error(guardrail.reason));
+            sendJson(response, 400, { error: guardrail.reason });
+            return;
+        }
+
+        // Concept 22: Token Budgets & Rate Limit Enforcement
+        const promptTokens = estimateTokenCount(message);
+        const budgetCheck = globalTokenBudgets.checkBudget(conversation.id, promptTokens);
+        if (!budgetCheck.allowed) {
+            chatSpan.end(new Error("Token budget exceeded"));
+            sendJson(response, 429, { error: budgetCheck.message });
+            return;
+        }
+
         let modelId;
         try {
-            modelId = await resolveModelId(body.model);
+            // Concept 16: Model Routing (routes fast queries to lightweight models, deep queries to versatile models)
+            const resolvedCandidate = body.model || routeModel({
+                prompt: message,
+                requestedModel: body.model,
+                availableModels: await currentModelList(),
+            });
+            modelId = await resolveModelId(resolvedCandidate);
         } catch (error) {
+            chatSpan.end(error);
             if (error.code === "model_unavailable") {
                 sendJson(response, 400, {
                     error: error.message,
@@ -1154,18 +1239,42 @@ async function handleApi(request, response, store) {
             }
             return;
         }
+
         // Optional RAG: retrieve the user's relevant chunks and inject as context.
-        // Normal chat (no `rag` flag) is completely unaffected.
+        // Concept 14: Hybrid Search (BM25 full-text + vector similarity fused via RRF)
         let ragContext = null;
         const sources = [];
         const ragEnabled = (body.rag === true || body.rag === "true") && !MOCK_MODE;
+
+        // Concept 2, 15 & 23: Response Cache with Tenant Isolation (non-RAG fast response)
+        if (!ragEnabled && !MOCK_MODE) {
+            const cached = globalResponseCache.get(user.sub, message, modelId);
+            if (cached) {
+                conversation.history.push({ role: "user", parts: [{ text: message }] });
+                conversation.history.push({ role: "model", parts: [{ text: cached.answer }] });
+                if (conversation.title === "New conversation") conversation.title = message.slice(0, 42);
+                conversation.updatedAt = new Date().toISOString();
+                await saveConversation(user, conversation, store);
+                chatSpan.end(null, { cached: true, answerLength: cached.answer.length });
+                logEvent("chat_cache_hit", { userId: user.sub, model: modelId });
+                sendJson(response, 200, { answer: cached.answer, isMock: false, cached: true, conversation, sources: [] });
+                return;
+            }
+        }
+
         if (ragEnabled) {
             let retrieved = [];
             try {
                 const questionEmbedding = await embeddings.embedText(message);
                 const documentIds = Array.isArray(body.documentIds) ? body.documentIds.map(String) : null;
-                retrieved = await retrieveChunks(user.sub, questionEmbedding, { documentIds, topK: 5 });
+                // Concept 14: Hybrid Search with RRF passing queryText
+                retrieved = await retrieveChunks(user.sub, questionEmbedding, {
+                    documentIds,
+                    topK: 5,
+                    queryText: message,
+                });
             } catch (ragError) {
+                chatSpan.end(ragError);
                 logError("rag_retrieval_failed", ragError, { userId: user.sub, conversationId: conversation.id });
                 sendJson(response, 503, { error: "Document search is temporarily unavailable. Please try again." });
                 return;
@@ -1177,6 +1286,7 @@ async function handleApi(request, response, store) {
                 if (conversation.title === "New conversation") conversation.title = message.slice(0, 42);
                 conversation.updatedAt = new Date().toISOString();
                 await saveConversation(user, conversation, store);
+                chatSpan.end(null, { noDocs: true });
                 sendJson(response, 200, { answer: noDocs, isMock: MOCK_MODE, conversation, sources });
                 return;
             }
@@ -1196,9 +1306,35 @@ async function handleApi(request, response, store) {
             conversation.updatedAt = new Date().toISOString();
             await manageConversationHistory(conversation, modelId);
             await saveConversation(user, conversation, store);
+
+            // Concepts 2 & 15: Cache answer with Tenant Isolation
+            if (!ragEnabled && !MOCK_MODE) {
+                globalResponseCache.set(user.sub, message, modelId, answer, sources);
+            }
+
+            // Concept 22: Track token consumption in budget
+            const totalTurnTokens = promptTokens + estimateTokenCount(answer);
+            globalTokenBudgets.recordTokens(conversation.id, totalTurnTokens);
+
+            // Concept 26: Shadow Evals (5% background sample against lightweight model)
+            if (!MOCK_MODE) {
+                maybeRunShadowEval({
+                    query: message,
+                    originalResponse: answer,
+                    sampleRate: 0.05,
+                    shadowFn: async () => chatWithAI(conversation, "llama-3.1-8b-instant", ragContext),
+                    onEvalResult: (stats) => logEvent("shadow_eval_logged", stats),
+                });
+            }
+
+            // Concept 21: End trace and log performance metrics
+            chatSpan.end(null, { answerLength: answer.length, model: modelId, sourcesCount: sources.length });
+            logEvent("chat_turn_completed", { ...tracer.getSummary(), userId: user.sub, model: modelId });
+
             sendJson(response, 200, { answer, isMock: MOCK_MODE, conversation, sources });
         } catch (error) {
             conversation.history.pop();
+            chatSpan.end(error);
             if (isModelError(error)) {
                 logError("chat_model_unavailable", error, { userId: user.sub, conversationId: conversation.id, model: modelId });
                 sendJson(response, 400, {
@@ -1220,6 +1356,14 @@ async function handleApi(request, response, store) {
             planInput = validateStudyPlanInput(body);
         } catch (error) {
             sendJson(response, 400, { error: error.message });
+            return;
+        }
+
+        // Concept 20: Input Guardrail
+        const guardrail = checkInputGuardrails(`${planInput.subject} ${planInput.goal}`);
+        if (!guardrail.safe) {
+            logEvent("guardrail_intercepted", { userId: user.sub, reason: guardrail.reason });
+            sendJson(response, 400, { error: guardrail.reason });
             return;
         }
         let modelId;
